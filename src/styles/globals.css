@@ -68,10 +68,10 @@ input[type="range"]::-moz-range-thumb:hover {
 /* Light Mode (Claude Theme) - Default */
 :root,
 [data-theme="light"] {
-  --accent-brand: 15 63.1% 59.6%;
-  --accent-main-000: 15 55.6% 52.4%;
-  --accent-main-100: 15 55.6% 52.4%;
-  --accent-main-200: 15 63.1% 59.6%;
+  --accent-brand: 15 72% 50%;
+  --accent-main-000: 15 68% 46%;
+  --accent-main-100: 15 68% 46%;
+  --accent-main-200: 15 72% 52%;
   --accent-main-900: 0 0% 0%;
   --accent-pro-000: 251 34.2% 33.3%;
   --accent-pro-100: 251 40% 45.1%;
@@ -83,14 +83,14 @@ input[type="range"]::-moz-range-thumb:hover {
   --accent-secondary-900: 211 72% 90%;
   --bg-000: 0 0% 100%;
   --bg-100: 48 33.3% 97.1%;
-  --bg-200: 53 28.6% 94.5%;
-  --bg-300: 48 25% 92.2%;
-  --bg-400: 50 20.7% 88.6%;
-  --bg-500: 50 20.7% 88.6%;
-  --border-100: 48 25% 92.2%;
-  --border-200: 48 25% 92.2%;
-  --border-300: 48 25% 92.2%;
-  --border-400: 48 25% 92.2%;
+  --bg-200: 53 28.6% 94%;
+  --bg-300: 48 25% 90%;
+  --bg-400: 50 20.7% 86%;
+  --bg-500: 50 20.7% 86%;
+  --border-100: 48 20% 86%;
+  --border-200: 48 20% 82%;
+  --border-300: 48 20% 78%;
+  --border-400: 48 20% 78%;
   --danger-000: 0 61.4% 22.4%;
   --danger-100: 0 58.6% 34.1%;
   --danger-200: 0 58.6% 34.1%;
@@ -98,13 +98,13 @@ input[type="range"]::-moz-range-thumb:hover {
   --oncolor-100: 0 0% 100%;
   --oncolor-200: 60 6.7% 97.1%;
   --oncolor-300: 60 6.7% 97.1%;
-  --text-000: 60 2.6% 7.6%;
-  --text-100: 60 2.6% 7.6%;
-  --text-200: 60 2.5% 23.3%;
-  --text-300: 60 2.5% 23.3%;
-  --text-400: 51 3.1% 43.7%;
-  --text-500: 51 3.1% 43.7%;
-  
+  --text-000: 60 4% 7%;
+  --text-100: 60 4% 7%;
+  --text-200: 60 3% 20%;
+  --text-300: 60 3% 28%;
+  --text-400: 51 5% 33%;
+  --text-500: 51 5% 38%;
+
   /* Mapped Variables for Compatibility */
   --background: hsl(var(--bg-000));
   --foreground: hsl(var(--text-000));
@@ -114,6 +114,54 @@ input[type="range"]::-moz-range-thumb:hover {
   --border: hsl(var(--border-100));
   --ring: hsl(var(--accent-brand));
   --primary: hsl(var(--accent-brand));
+}
+
+/* Light-mode-specific overrides for tag/chip/icon colors that use an
+   injected --tag-hue. The default formula (70% sat, 65% L) reads as
+   pastel-on-pastel in light mode; darken the text and firm up the bg
+   alpha so project badges, hero icons, and pills feel anchored.
+   next-themes is configured with attribute="class" (see App.tsx's
+   ThemeProvider), so the active class sits on <html> — we target both
+   `.light` (class mode) and `[data-theme="light"]` (attribute mode). */
+.light .proj-row .dash-row-project-tag,
+[data-theme="light"] .proj-row .dash-row-project-tag {
+  background: hsl(var(--tag-hue, var(--accent-main-000)) 60% 50% / 0.14);
+  color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 32%);
+  border-color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 50% / 0.35);
+}
+.light .proj-row:hover .dash-row-project-tag,
+[data-theme="light"] .proj-row:hover .dash-row-project-tag {
+  background: hsl(var(--tag-hue, var(--accent-main-000)) 60% 50% / 0.22);
+  border-color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 50% / 0.55);
+}
+.light .proj-hero-icon,
+[data-theme="light"] .proj-hero-icon {
+  color: hsl(var(--tag-hue, var(--accent-pro-000)) 55% 42%);
+}
+.light .dash-compose-pill.is-interactive[style*="--tag-hue"] svg:first-child,
+[data-theme="light"] .dash-compose-pill.is-interactive[style*="--tag-hue"] svg:first-child {
+  color: hsl(var(--tag-hue) 55% 42%);
+}
+.light .dash-compose-picker-folder,
+[data-theme="light"] .dash-compose-picker-folder {
+  color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 42%);
+}
+/* Compose input — in light mode the default bg-100 @ 70% alpha reads as
+   white-on-white. Give it a warmer cream fill and a firmer border so it
+   actually looks like an input. */
+.light .dash-compose,
+[data-theme="light"] .dash-compose {
+  background: hsl(var(--bg-200));
+  border-color: hsl(var(--border-200));
+}
+.light .dash-compose:focus-within,
+[data-theme="light"] .dash-compose:focus-within {
+  background: hsl(var(--bg-100));
+  border-color: hsl(var(--accent-main-000) / 0.55);
+}
+.light .dash-compose-input::placeholder,
+[data-theme="light"] .dash-compose-input::placeholder {
+  opacity: 0.75;
 }
 
 /* Dark Mode (Claude Theme) */
@@ -211,110 +259,6 @@ input[type="range"]::-moz-range-thumb:hover {
   --oncolor-100: 35.3 100.0% 96.7%;
   --oncolor-200: 35.3 100.0% 96.7%;
   --oncolor-300: 35.3 100.0% 96.7%;
-
-  --background: hsl(var(--bg-000));
-  --foreground: hsl(var(--text-000));
-  --secondary: hsl(var(--bg-200));
-  --muted: hsl(var(--bg-300));
-  --muted-foreground: hsl(var(--text-400));
-  --border: hsl(var(--bg-400));
-  --ring: hsl(var(--accent-brand));
-  --primary: hsl(var(--accent-brand));
-}
-
-/* =========================================================== */
-/* Claude Honeycomb Bloom — floral peony + wisteria              */
-/* =========================================================== */
-.honeycomb-bloom,
-[data-theme="honeycomb-bloom"] {
-  --bg-000: 30.0 14.3% 8.2%;
-  --bg-100: 30.0 14.3% 11.0%;
-  --bg-200: 30.0 11.1% 14.1%;
-  --bg-300: 30.0 13.6% 17.3%;
-  --bg-400: 30.0 12.7% 21.6%;
-  --bg-500: 25.7 9.9% 27.8%;
-  --text-000: 36.5 39.0% 88.4%;
-  --text-100: 36.5 39.0% 88.4%;
-  --text-200: 36.0 26.8% 78.0%;
-  --text-300: 36.0 26.8% 78.0%;
-  --text-400: 35.0 11.2% 58.0%;
-  --text-500: 26.7 8.0% 44.3%;
-  --border-100: 30.0 12.7% 21.6%;
-  --border-200: 30.0 12.7% 21.6%;
-  --border-300: 30.0 12.7% 21.6%;
-  --border-400: 25.7 9.9% 27.8%;
-  --accent-brand: 345.6 68.5% 71.4%;
-  --accent-main-000: 345.6 68.5% 71.4%;
-  --accent-main-100: 345.6 68.5% 71.4%;
-  --accent-main-200: 345.6 68.5% 71.4%;
-  --accent-main-900: 346.2 52.5% 61.2%;
-  --accent-pro-000: 267.0 72.7% 78.4%;
-  --accent-pro-100: 267.0 72.7% 78.4%;
-  --accent-pro-200: 267.0 72.7% 78.4%;
-  --accent-pro-900: 30.0 13.6% 17.3%;
-  --accent-secondary-000: 35.6 55.7% 62.0%;
-  --accent-secondary-100: 35.6 55.7% 62.0%;
-  --accent-secondary-200: 35.6 55.7% 62.0%;
-  --accent-secondary-900: 30.0 13.6% 17.3%;
-  --danger-000: 16.0 80.0% 70.6%;
-  --danger-100: 16.0 80.0% 70.6%;
-  --danger-200: 16.0 80.0% 70.6%;
-  --danger-900: 30.0 13.6% 17.3%;
-  --oncolor-100: 36.0 58.8% 93.3%;
-  --oncolor-200: 36.0 58.8% 93.3%;
-  --oncolor-300: 36.0 58.8% 93.3%;
-
-  --background: hsl(var(--bg-000));
-  --foreground: hsl(var(--text-000));
-  --secondary: hsl(var(--bg-200));
-  --muted: hsl(var(--bg-300));
-  --muted-foreground: hsl(var(--text-400));
-  --border: hsl(var(--bg-400));
-  --ring: hsl(var(--accent-brand));
-  --primary: hsl(var(--accent-brand));
-}
-
-/* =========================================================== */
-/* Claude Honeycomb Sable — editorial sable + dusty rose         */
-/* =========================================================== */
-.honeycomb-sable,
-[data-theme="honeycomb-sable"] {
-  --bg-000: 20.0 15.0% 7.8%;
-  --bg-100: 25.7 13.2% 10.4%;
-  --bg-200: 36.9 20.6% 12.4%;
-  --bg-300: 34.3 17.1% 16.1%;
-  --bg-400: 33.3 17.3% 20.4%;
-  --bg-500: 31.6 14.1% 26.5%;
-  --text-000: 35.5 32.4% 86.7%;
-  --text-100: 35.5 32.4% 86.7%;
-  --text-200: 35.6 22.0% 75.9%;
-  --text-300: 35.6 22.0% 75.9%;
-  --text-400: 33.3 12.2% 56.7%;
-  --text-500: 25.7 9.9% 41.8%;
-  --border-100: 33.3 17.3% 20.4%;
-  --border-200: 33.3 17.3% 20.4%;
-  --border-300: 33.3 17.3% 20.4%;
-  --border-400: 31.6 14.1% 26.5%;
-  --accent-brand: 5.2 66.7% 72.9%;
-  --accent-main-000: 5.2 66.7% 72.9%;
-  --accent-main-100: 5.2 66.7% 72.9%;
-  --accent-main-200: 5.2 66.7% 72.9%;
-  --accent-main-900: 5.0 50.5% 62.7%;
-  --accent-pro-000: 315.0 26.4% 64.3%;
-  --accent-pro-100: 315.0 26.4% 64.3%;
-  --accent-pro-200: 315.0 26.4% 64.3%;
-  --accent-pro-900: 34.3 17.1% 16.1%;
-  --accent-secondary-000: 39.1 51.7% 65.1%;
-  --accent-secondary-100: 39.1 51.7% 65.1%;
-  --accent-secondary-200: 39.1 51.7% 65.1%;
-  --accent-secondary-900: 34.3 17.1% 16.1%;
-  --danger-000: 20.0 60.6% 61.2%;
-  --danger-100: 20.0 60.6% 61.2%;
-  --danger-200: 20.0 60.6% 61.2%;
-  --danger-900: 34.3 17.1% 16.1%;
-  --oncolor-100: 36.0 42.9% 93.1%;
-  --oncolor-200: 36.0 42.9% 93.1%;
-  --oncolor-300: 36.0 42.9% 93.1%;
 
   --background: hsl(var(--bg-000));
   --foreground: hsl(var(--text-000));
@@ -1624,9 +1568,7 @@ body {
 }
 
 .dark .tool-row:hover,
-.honeycomb .tool-row:hover,
-.honeycomb-bloom .tool-row:hover,
-.honeycomb-sable .tool-row:hover {
+.honeycomb .tool-row:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -2212,9 +2154,7 @@ body {
 }
 
 .dark .timeline-container,
-.honeycomb .timeline-container,
-.honeycomb-bloom .timeline-container,
-.honeycomb-sable .timeline-container {
+.honeycomb .timeline-container {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -2734,164 +2674,56 @@ body {
 }
 
 /* =========================================================== */
-/* SessionViewer Info Rail — editorial delighter                 */
+/* SessionViewer Info Rail — flat panel with prompt + recap       */
 /* =========================================================== */
-@keyframes rail-fade-up {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes rail-breathe {
-  0%, 100% { opacity: 0.45; transform: scale(1); }
-  50%      { opacity: 0.75; transform: scale(1.05); }
-}
-
 .rail {
-  width: 340px;
+  width: 320px;
   flex-shrink: 0;
   border-left: 1px solid var(--border);
-  background:
-    radial-gradient(ellipse at top, hsl(var(--accent-main-000) / 0.08) 0%, transparent 60%),
-    linear-gradient(180deg, var(--secondary) 0%, var(--background) 100%);
+  background: var(--background);
   overflow-y: auto;
-  position: relative;
   display: flex;
   flex-direction: column;
-}
-
-/* Subtle paper grain — SVG-in-CSS, no extra asset */
-.rail::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 0.96  0 0 0 0 0.66  0 0 0 0 0.5  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-}
-
-.rail > * {
-  position: relative; /* sit above the grain */
-}
-
-.rail-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 22px 12px;
-  position: relative;
-}
-
-.rail-brand-glyph {
-  width: 34px;
-  height: 34px;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.rail-brand-glyph::after {
-  content: '';
-  position: absolute;
-  inset: -10px;
-  border-radius: 50%;
-  background: radial-gradient(circle, hsl(var(--accent-main-000) / 0.35) 0%, transparent 65%);
-  animation: rail-breathe 4.2s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.rail-brand-label {
-  margin-top: 10px;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-style: italic;
-  font-weight: 400;
-  color: var(--muted-foreground);
-  letter-spacing: 0.02em;
 }
 
 .rail-section {
-  padding: 14px 22px;
-  animation: rail-fade-up 0.35s ease-out both;
+  padding: 18px 22px 4px;
 }
-.rail-section:nth-of-type(2) { animation-delay: 80ms; }
-.rail-section:nth-of-type(3) { animation-delay: 140ms; }
+.rail-section + .rail-section {
+  padding-top: 14px;
+}
 
-.rail-eyebrow {
-  font-family: var(--font-body);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+.rail-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.rail-eyebrow.tone-prompt { color: hsl(var(--accent-secondary-000)); }
-.rail-eyebrow.tone-recap  { color: hsl(var(--accent-main-000)); }
-
-.rail-eyebrow::after {
-  content: '';
-  display: inline-block;
-  height: 1px;
-  flex: 1;
-  background: currentColor;
-  opacity: 0.3;
-  margin-left: 4px;
-  max-width: 60px;
+  color: var(--muted-foreground);
+  margin-bottom: 8px;
 }
 
 .rail-prompt {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 15.5px;
+  font-size: 14px;
   line-height: 1.55;
   color: var(--foreground);
   letter-spacing: -0.005em;
-  position: relative;
-  padding-left: 14px;
-}
-
-.rail-prompt::before {
-  content: '"';
-  position: absolute;
-  left: -6px;
-  top: -10px;
-  font-family: var(--font-display);
-  font-size: 40px;
-  font-weight: 600;
-  color: hsl(var(--accent-secondary-000));
-  opacity: 0.35;
-  font-style: normal;
-  line-height: 1;
-}
-
-.rail-recap {
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  line-height: 1.65;
-  color: var(--foreground);
-  opacity: 0.88;
+  font-weight: 500;
   white-space: pre-wrap;
 }
 
-.rail-recap p + p { margin-top: 0.5em; }
-
-/* Hand-drawn thread divider between sections */
-.rail-divider {
-  display: block;
-  margin: 4px 22px;
-  opacity: 0.5;
+.rail-recap {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--foreground);
+  opacity: 0.9;
+  white-space: pre-wrap;
 }
+.rail-recap p + p { margin-top: 0.5em; }
 
 .rail-footer {
   margin-top: auto;
-  padding: 18px 22px 22px;
-  border-top: 1px dashed var(--border);
+  padding: 16px 22px 20px;
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2901,26 +2733,24 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
 }
 
 .rail-stat {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: hsl(var(--bg-200) / 0.7);
-  border: 1px solid var(--border);
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
-  font-size: 10px;
 }
-
-.rail-stat strong {
-  color: var(--foreground);
-  font-weight: 500;
+.rail-stat + .rail-stat::before {
+  content: '·';
+  margin-right: 2px;
+  opacity: 0.5;
+}
+.rail-stat-mono {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
 }
 
 .rail-cta {
@@ -2928,36 +2758,24 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, hsl(var(--accent-main-000)) 0%, hsl(var(--accent-main-000) / 0.82) 100%);
+  padding: 9px 14px;
+  border-radius: 8px;
+  background: hsl(var(--accent-main-000));
   color: hsl(var(--bg-000));
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
   border: none;
   cursor: pointer;
-  box-shadow: 0 1px 2px hsl(0 0% 0% / 0.15), 0 0 0 1px hsl(var(--accent-main-000) / 0.3) inset;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .rail-cta:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.05);
-  box-shadow: 0 4px 12px hsl(var(--accent-main-000) / 0.3), 0 0 0 1px hsl(var(--accent-main-000) / 0.5) inset;
+  background: hsl(var(--accent-main-000) / 0.9);
 }
-
 .rail-cta:active {
-  transform: translateY(0);
-  filter: brightness(0.95);
-}
-
-.rail-cta-arrow {
-  transition: transform 0.15s ease;
-}
-.rail-cta:hover .rail-cta-arrow {
-  transform: translateX(3px);
+  background: hsl(var(--accent-main-000) / 0.82);
 }
 
 /* Use editorial font for the big dashboard greeting too */

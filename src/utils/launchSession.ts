@@ -2,7 +2,7 @@ const DEFAULT_TEMPLATE = 'cd {projectPath} && claude --resume {sessionId}'
 // Tilde is shell-expanded by zsh/bash to the current user's $HOME, so this
 // stays portable across machines without needing to round-trip through IPC.
 export const DEFAULT_NEW_CHAT_PATH = '~'
-export const DEFAULT_NEW_CHAT_TEMPLATE = 'cd {projectPath}; agency claude --mcp workiq'
+export const DEFAULT_NEW_CHAT_TEMPLATE = 'cd {projectPath}; claude'
 
 /**
  * Build the resume command from the user's template (Settings modal) and

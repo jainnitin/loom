@@ -281,6 +281,8 @@ pub fn run() {
 
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.show();
+                #[cfg(debug_assertions)]
+                main.open_devtools();
             }
 
             Ok(())

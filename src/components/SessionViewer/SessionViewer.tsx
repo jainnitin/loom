@@ -30,6 +30,8 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
   }
   const [sessionLoading, setSessionLoading] = useState(false)
   const [sessionError, setSessionError] = useState<string | null>(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const messageRefs = useRef<(HTMLDivElement | null)[]>([])
   const sessionMessages = messages[tab.sessionId || ''] || []
@@ -192,15 +194,20 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
     launchSessionInTerminal(tab.projectPath, tab.sessionId)
   }
 
-  const handleDeleteSession = async () => {
+  const handleDeleteSession = () => {
     if (!tab.sessionId || !session) return
-    const title = session.customTitle || session.firstUserMessage?.slice(0, 80) || 'this session'
-    const ok = window.confirm(
-      `Delete "${title}"?\n\nThe JSONL is moved to macOS Trash so it's recoverable via Finder, but it will no longer show up in Loom or \`claude --resume\`.`,
-    )
-    if (!ok) return
+    setDeleteError(null)
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!tab.sessionId || !session) return
     const res = await trashSession(tab.projectPath, tab.sessionId, session.filePath)
-    if (!res.ok) alert(`Failed to move to Trash: ${res.error || 'unknown error'}`)
+    if (!res.ok) {
+      setDeleteError(res.error || 'unknown error')
+      return
+    }
+    setDeleteConfirmOpen(false)
     // Tab closes automatically via the store's trashSession action.
   }
 
@@ -488,51 +495,19 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
         </div>
         </div>
 
-        {/* Info rail: You asked + Recap — editorial delighter */}
+        {/* Info rail — prompt + recap for the current session */}
         {infoRailOpen && (session?.firstUserMessage || session?.sessionSummary) && (
           <aside className="rail">
-            <div className="rail-brand">
-              <div className="rail-brand-glyph">
-                <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true">
-                  <g stroke="hsl(var(--accent-main-000))" strokeWidth="3" strokeLinecap="round" fill="none">
-                    <line x1="18" y1="10" x2="18" y2="38" />
-                    <line x1="30" y1="10" x2="30" y2="38" />
-                    <line x1="10" y1="18" x2="38" y2="18" />
-                    <line x1="10" y1="30" x2="38" y2="30" />
-                  </g>
-                </svg>
-              </div>
-              <div className="rail-brand-label">this thread</div>
-            </div>
-
             {session?.firstUserMessage && (
               <section className="rail-section">
-                <div className="rail-eyebrow tone-prompt">You asked</div>
+                <div className="rail-label">Prompt</div>
                 <div className="rail-prompt">{session.firstUserMessage}</div>
               </section>
             )}
 
-            {session?.firstUserMessage && session?.sessionSummary && (
-              <svg
-                className="rail-divider"
-                width="296"
-                height="12"
-                viewBox="0 0 296 12"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <g stroke="hsl(var(--accent-main-000))" strokeWidth="1.25" strokeLinecap="round" fill="none">
-                  <path d="M4,6 Q40,2 74,6 T148,6 T222,6 T292,6" />
-                  <line x1="70" y1="2" x2="70" y2="10" opacity="0.55" />
-                  <line x1="148" y1="2" x2="148" y2="10" opacity="0.55" />
-                  <line x1="226" y1="2" x2="226" y2="10" opacity="0.55" />
-                </g>
-              </svg>
-            )}
-
             {session?.sessionSummary && (
               <section className="rail-section">
-                <div className="rail-eyebrow tone-recap">Recap</div>
+                <div className="rail-label">Recap</div>
                 <div className="rail-recap">{session.sessionSummary}</div>
               </section>
             )}
@@ -541,16 +516,16 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
               <div className="rail-stats">
                 {session?.mtime && (
                   <span className="rail-stat" title={new Date(session.mtime).toLocaleString()}>
-                    <strong>{new Date(session.mtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</strong>
+                    {new Date(session.mtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 )}
                 {session?.messageCount !== undefined && (
                   <span className="rail-stat">
-                    <strong>{session.messageCount}</strong> msgs
+                    {session.messageCount} msgs
                   </span>
                 )}
                 {tab.sessionId && (
-                  <span className="rail-stat" title={tab.sessionId}>
+                  <span className="rail-stat rail-stat-mono" title={tab.sessionId}>
                     {tab.sessionId.substring(0, 8)}
                   </span>
                 )}
@@ -558,11 +533,10 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
               <button
                 className="rail-cta"
                 onClick={handleLaunchInTerminal}
-                title="Resume this thread in iTerm (or Terminal)"
+                title="Resume this session in iTerm"
               >
                 <Terminal size={14} />
                 <span>Resume in iTerm</span>
-                <span className="rail-cta-arrow">→</span>
               </button>
             </div>
           </aside>
@@ -598,12 +572,85 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
           }
         }}
       >
-        <Timeline 
+        <Timeline
           messages={processedMessages}
           currentIndex={currentMessageIndex}
           onJump={handleTimelineJump}
         />
       </div>
+
+      {deleteConfirmOpen && session && (
+        <div
+          onMouseDown={() => setDeleteConfirmOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'var(--background)',
+              borderRadius: 12,
+              width: 440,
+              maxWidth: '90vw',
+              border: '1px solid var(--border)',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)',
+              padding: '22px 24px 18px',
+            }}
+          >
+            <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}>Delete session?</h3>
+            <p style={{ margin: '0 0 4px', fontSize: 13, color: 'var(--foreground)' }}>
+              <strong>{session.customTitle || session.firstUserMessage?.slice(0, 80) || 'this session'}</strong>
+            </p>
+            <p style={{ margin: '0 0 18px', fontSize: 12, color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
+              The JSONL is moved to macOS Trash — recoverable via Finder — but it will no longer show up in Loom or <code>claude --resume</code>.
+            </p>
+            {deleteError && (
+              <p style={{ margin: '0 0 12px', fontSize: 12, color: 'hsl(var(--danger-000))' }}>
+                Failed: {deleteError}
+              </p>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button
+                onClick={() => setDeleteConfirmOpen(false)}
+                style={{
+                  padding: '7px 14px',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  background: 'var(--background)',
+                  color: 'var(--foreground)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  padding: '7px 14px',
+                  border: 'none',
+                  borderRadius: 6,
+                  background: 'hsl(var(--danger-000))',
+                  color: 'white',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Move to Trash
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

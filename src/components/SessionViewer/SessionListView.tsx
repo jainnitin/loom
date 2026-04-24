@@ -203,7 +203,7 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
     hoverTimeoutRef.current = setTimeout(() => {
       setPreviewPosition(pos)
       setHoveredSession(s.id)
-    }, 500)
+    }, 900)
   }
   const handlePreviewLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)

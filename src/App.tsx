@@ -5,9 +5,18 @@ import { useAppStore } from '@/store/appStore'
 import { findMatchingProject } from '@/utils/projectPathUtils'
 import './styles/globals.css'
 
+// One-time migration: the honeycomb-bloom / honeycomb-sable themes were
+// removed; clear the saved value so next-themes falls back to defaultTheme
+// instead of applying a class that no longer has any CSS attached.
+const REMOVED_THEMES = new Set(['honeycomb-bloom', 'honeycomb-sable'])
+try {
+  const saved = localStorage.getItem('theme')
+  if (saved && REMOVED_THEMES.has(saved)) localStorage.removeItem('theme')
+} catch {}
+
 function App(): JSX.Element {
   const { setProjects, setSessions, setSessionsForProject, createSessionTab, ensureDashboardTab, selectProject } = useAppStore()
-  
+
   useEffect(() => {
     // Load projects on app start
     loadProjects()
@@ -142,7 +151,7 @@ function App(): JSX.Element {
       attribute="class"
       defaultTheme="system"
       enableSystem
-      themes={['light', 'dark', 'honeycomb', 'honeycomb-bloom', 'honeycomb-sable']}
+      themes={['light', 'dark', 'honeycomb']}
     >
       <Layout />
     </ThemeProvider>

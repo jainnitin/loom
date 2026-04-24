@@ -447,7 +447,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 padding: '8px 16px',
                 border: 'none',
                 borderRadius: '6px',
-                backgroundColor: 'var(--accent)',
+                backgroundColor: 'hsl(var(--accent-main-000))',
                 color: 'white',
                 fontSize: '13px',
                 cursor: 'pointer',

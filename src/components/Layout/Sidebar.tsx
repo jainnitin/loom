@@ -177,11 +177,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenPalette, onOpenSettings 
           width: '4px',
           cursor: 'col-resize',
           zIndex: 11,
-          background: isResizing ? 'var(--accent)' : 'transparent',
+          background: isResizing ? 'hsl(var(--accent-main-000))' : 'transparent',
           transition: 'background 0.2s',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'var(--accent)'
+          e.currentTarget.style.background = 'hsl(var(--accent-main-000))'
         }}
         onMouseLeave={(e) => {
           if (!isResizing) {
