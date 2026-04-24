@@ -6,6 +6,7 @@ import {
   Terminal,
   EyeOff,
   Eye,
+  Activity,
 } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { formatRelativeTime, formatClockTime, cleanTitle } from '@/utils/formatters'
@@ -38,6 +39,23 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
+  const [userName, setUserName] = useState<string>('')
+
+  // Same source as the sidebar — derive a friendly first name from $HOME's basename.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const home = await window.api?.getHomePath?.()
+        if (cancelled || !home) return
+        const base = String(home).split('/').filter(Boolean).pop() || ''
+        setUserName(base ? base.charAt(0).toUpperCase() + base.slice(1) : '')
+      } catch {}
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // Press "/" anywhere on the Dashboard (except while typing) to open the filter
   useEffect(() => {
@@ -225,18 +243,66 @@ export const Dashboard: React.FC = () => {
     createSessionTab(s.id, s.projectPath, s.id.substring(0, 8))
   }
 
-  const greeting = 'What do you want to explore or resume?'
-
   return (
     <div className="dash-root">
-      <div className="dash-inner">
+      <div className="dash-inner proj-compact">
+        <header className="proj-hero">
+          <div className="proj-hero-title-row">
+            <Activity size={18} className="proj-hero-icon" />
+            <h1 className="proj-hero-name">
+              {userName ? `Hi, ${userName}` : 'Welcome back'}
+            </h1>
+          </div>
+          <div className="proj-hero-stats">
+            <span className="proj-stat">
+              <strong>{stats.totalProjects}</strong>
+              <span className="proj-stat-label">
+                {stats.totalProjects === 1 ? 'project' : 'projects'}
+              </span>
+            </span>
+            <span className="proj-stat-sep">·</span>
+            <span className="proj-stat">
+              <strong>{stats.sessionsTotal}</strong>
+              <span className="proj-stat-label">
+                {stats.sessionsTotal === 1 ? 'session' : 'sessions'}
+              </span>
+            </span>
+            <span className="proj-stat-sep">·</span>
+            <span className="proj-stat">
+              <strong>{stats.messagesTotal.toLocaleString()}</strong>
+              <span className="proj-stat-label">
+                {stats.messagesTotal === 1 ? 'message' : 'messages'}
+              </span>
+            </span>
+            {stats.sessionsThisWeek > 0 && (
+              <>
+                <span className="proj-stat-sep">·</span>
+                <span className="proj-stat">
+                  <strong>{stats.sessionsThisWeek}</strong>
+                  <span className="proj-stat-label">this week</span>
+                  {stats.activeProjectsWeek > 0 && (
+                    <span className="proj-stat-hint">
+                      across {stats.activeProjectsWeek}{' '}
+                      {stats.activeProjectsWeek === 1 ? 'project' : 'projects'}
+                    </span>
+                  )}
+                </span>
+              </>
+            )}
+            {stats.latestMtime && (
+              <>
+                <span className="proj-stat-sep">·</span>
+                <span className="proj-stat">
+                  <span className="proj-stat-label">
+                    last activity {formatRelativeTime(stats.latestMtime)}
+                  </span>
+                </span>
+              </>
+            )}
+          </div>
+        </header>
+
         <ComposeHero
-          greeting={greeting}
-          caption={
-            <>
-              {stats.sessionsTotal} sessions · {stats.messagesTotal.toLocaleString()} messages across {stats.totalProjects} projects
-            </>
-          }
           defaultTargetPath={null}
           projects={projects}
         />

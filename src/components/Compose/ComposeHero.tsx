@@ -5,23 +5,27 @@ import { startNewChatInTerminal, DEFAULT_NEW_CHAT_PATH } from '@/utils/launchSes
 import type { Project } from '@/types'
 
 interface ComposeHeroProps {
-  greeting: string
+  greeting?: string
   caption?: React.ReactNode
+  placeholder?: string
   // Initial project target. null = home (default from Settings). Otherwise a
   // project real-path like "/Users/nitin/code/foo".
   defaultTargetPath: string | null
   projects: Project[]
 }
 
+const DEFAULT_PLACEHOLDER = 'Start a new chat — type your prompt and press Enter'
+
 /**
- * Shared compose hero — large serif greeting + single-line prompt that fires
- * `claude "query"` into iTerm. Used on the Dashboard and on every project
- * page. Caller controls greeting, caption, and which folder the launch
- * should target by default.
+ * Shared compose hero — single-line prompt that fires `claude "query"` into
+ * iTerm. Used on the Dashboard and on every project page. Greeting and
+ * caption are optional — when omitted, the input + placeholder carry the
+ * prompt on their own.
  */
 export const ComposeHero: React.FC<ComposeHeroProps> = ({
   greeting,
   caption,
+  placeholder = DEFAULT_PLACEHOLDER,
   defaultTargetPath,
   projects,
 }) => {
@@ -95,17 +99,19 @@ export const ComposeHero: React.FC<ComposeHeroProps> = ({
 
   return (
     <header className="dash-compose-hero">
-      <div className="dash-compose-title-row">
-        <svg className="dash-compose-glyph" width="22" height="22" viewBox="0 0 48 48" aria-hidden="true">
-          <g stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none">
-            <line x1="18" y1="8" x2="18" y2="40" />
-            <line x1="30" y1="8" x2="30" y2="40" />
-            <line x1="8" y1="18" x2="40" y2="18" />
-            <line x1="8" y1="30" x2="40" y2="30" />
-          </g>
-        </svg>
-        <h1 className="dash-compose-greeting">{greeting}</h1>
-      </div>
+      {greeting && (
+        <div className="dash-compose-title-row">
+          <svg className="dash-compose-glyph" width="22" height="22" viewBox="0 0 48 48" aria-hidden="true">
+            <g stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none">
+              <line x1="18" y1="8" x2="18" y2="40" />
+              <line x1="30" y1="8" x2="30" y2="40" />
+              <line x1="8" y1="18" x2="40" y2="18" />
+              <line x1="8" y1="30" x2="40" y2="30" />
+            </g>
+          </svg>
+          <h1 className="dash-compose-greeting">{greeting}</h1>
+        </div>
+      )}
       {caption && <p className="dash-compose-caption">{caption}</p>}
 
       <form
@@ -118,7 +124,7 @@ export const ComposeHero: React.FC<ComposeHeroProps> = ({
         <input
           type="text"
           className="dash-compose-input"
-          placeholder="Type your query"
+          placeholder={placeholder}
           value={composeQuery}
           onChange={(e) => setComposeQuery(e.target.value)}
           autoFocus
@@ -202,7 +208,6 @@ export const ComposeHero: React.FC<ComposeHeroProps> = ({
             </div>
           )}
         </div>
-        <span className="dash-compose-hint">Press Enter to launch</span>
       </div>
     </header>
   )

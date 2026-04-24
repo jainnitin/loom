@@ -30,7 +30,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ searchQuery = '' }) =>
     selectProject,
     setSessions,
     setSessionsForProject,
-    createProjectTab,
     preloadAllSessions,
   } = useAppStore()
 
@@ -151,7 +150,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ searchQuery = '' }) =>
       const sessions = await window.api.getSessions(project.path)
       setSessions(sessions)
       setSessionsForProject(project.name, sessions)
-      createProjectTab(project.name)
     } catch (error: any) {
       console.error('[ProjectList] Failed to load sessions for project:', project.name, error?.message)
       setSessions([])

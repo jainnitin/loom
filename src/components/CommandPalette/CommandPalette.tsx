@@ -18,7 +18,7 @@ export const CommandPalette: React.FC<Props> = ({ open, onClose }) => {
   const {
     projects,
     sessionsByProject,
-    createProjectTab,
+    selectProject,
     createSessionTab,
     selectSession,
     preloadAllSessions,
@@ -141,7 +141,7 @@ export const CommandPalette: React.FC<Props> = ({ open, onClose }) => {
 
   const openItem = (it: Item) => {
     if (it.kind === 'project') {
-      createProjectTab(it.project.name)
+      selectProject(it.project.name)
     } else {
       selectSession(it.session.id)
       createSessionTab(it.session.id, it.project.name, it.session.id.substring(0, 8))

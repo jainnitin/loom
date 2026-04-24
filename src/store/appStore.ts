@@ -72,7 +72,15 @@ export const useAppStore = create<AppStore>((set, get) => ({
   // Actions
   setProjects: (projects) => set({ projects }),
   
-  selectProject: (path) => set({ selectedProjectPath: path, sessions: [], selectedSessionId: null }),
+  // Selecting a project switches the main pane to its session list — but does
+  // not create a tab. The tab strip is reserved for Dashboard + open sessions.
+  // We deactivate any current tab so the page header reflects the project view.
+  selectProject: (path) => set({
+    selectedProjectPath: path,
+    sessions: [],
+    selectedSessionId: null,
+    activeTabId: null,
+  }),
   
   setSessions: (sessions) => set({ sessions }),
   

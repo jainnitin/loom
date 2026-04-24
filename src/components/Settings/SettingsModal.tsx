@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, RotateCcw, Info, Check } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { X, RotateCcw } from 'lucide-react'
 import { DEFAULT_NEW_CHAT_PATH, DEFAULT_NEW_CHAT_TEMPLATE } from '@/utils/launchSession'
 
 interface SettingsModalProps {
@@ -10,16 +9,81 @@ interface SettingsModalProps {
 
 const DEFAULT_COMMAND = 'cd {projectPath} && claude --resume {sessionId}'
 
-const THEME_OPTIONS: { id: string; label: string; description: string; swatches: [string, string, string] }[] = [
-  { id: 'light',            label: 'Claude Light',     description: 'Default light theme',               swatches: ['#ffffff', '#f4f1e8', '#c96442'] },
-  { id: 'dark',             label: 'Claude Dark',      description: 'Default dark theme',                swatches: ['#262624', '#1f1e1d', '#c96442'] },
-  { id: 'honeycomb',        label: 'Honeycomb',        description: 'Warm chocolate + soft peach',        swatches: ['#1a1714', '#332e28', '#f5a97f'] },
-  { id: 'honeycomb-bloom',  label: 'Honeycomb Bloom',  description: 'Floral peony + wisteria',           swatches: ['#181512', '#322c26', '#e8849c'] },
-  { id: 'honeycomb-sable',  label: 'Honeycomb Sable',  description: 'Editorial sable + dusty rose',      swatches: ['#171311', '#302a22', '#e8948c'] },
-]
+const sectionHeadingStyle: React.CSSProperties = {
+  fontSize: '11px',
+  fontWeight: 600,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: 'var(--muted-foreground)',
+  marginBottom: '10px',
+}
+
+const sectionHintStyle: React.CSSProperties = {
+  fontSize: '12px',
+  color: 'var(--muted-foreground)',
+  marginBottom: '14px',
+  lineHeight: 1.5,
+}
+
+const fieldHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  marginBottom: '6px',
+}
+
+const fieldLabelStyle: React.CSSProperties = {
+  fontSize: '13px',
+  fontWeight: 500,
+  color: 'var(--foreground)',
+}
+
+const subLabelStyle: React.CSSProperties = {
+  fontSize: '11px',
+  color: 'var(--muted-foreground)',
+  marginBottom: '4px',
+}
+
+const resetBtnStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: '2px 6px',
+  borderRadius: '4px',
+  color: 'var(--muted-foreground)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  fontSize: '11px',
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '8px 12px',
+  border: '1px solid var(--border)',
+  borderRadius: '6px',
+  backgroundColor: 'var(--background)',
+  color: 'var(--foreground)',
+  fontSize: '13px',
+  fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
+  outline: 'none',
+}
+
+const textareaStyle: React.CSSProperties = {
+  width: '100%',
+  minHeight: '72px',
+  padding: '10px 12px',
+  border: '1px solid var(--border)',
+  borderRadius: '8px',
+  backgroundColor: 'var(--background)',
+  color: 'var(--foreground)',
+  fontSize: '13px',
+  fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
+  resize: 'vertical',
+  outline: 'none',
+}
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
-  const { theme, setTheme } = useTheme()
   const [customCommand, setCustomCommand] = useState('')
   const [isDefault, setIsDefault] = useState(true)
   const [newChatCommand, setNewChatCommand] = useState('')
@@ -176,358 +240,98 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
           {/* Content */}
           <div style={{ padding: '24px', maxHeight: 'calc(80vh - 140px)', overflowY: 'auto' }}>
-            {/* Theme Section */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: 500,
-                color: 'var(--foreground)',
-                marginBottom: '10px',
-              }}>
-                Theme
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {THEME_OPTIONS.map((opt) => {
-                  const active = theme === opt.id
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => setTheme(opt.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        width: '100%',
-                        padding: '10px 12px',
-                        border: `1px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
-                        borderRadius: '8px',
-                        background: active ? 'var(--secondary)' : 'var(--background)',
-                        color: 'var(--foreground)',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'all 0.15s ease',
-                      }}
-                      onMouseOver={(e) => {
-                        if (!active) e.currentTarget.style.background = 'var(--secondary)'
-                      }}
-                      onMouseOut={(e) => {
-                        if (!active) e.currentTarget.style.background = 'var(--background)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                        {opt.swatches.map((hex, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              width: '14px',
-                              height: '20px',
-                              borderRadius: '3px',
-                              background: hex,
-                              border: '1px solid rgba(0,0,0,0.2)',
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '13px', fontWeight: 500 }}>{opt.label}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--muted-foreground)' }}>{opt.description}</div>
-                      </div>
-                      {active && <Check size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />}
+            {/* ─────── Terminal commands ─────── */}
+            <div style={{ marginBottom: '28px' }}>
+              <div style={sectionHeadingStyle}>Terminal commands</div>
+              <div style={sectionHintStyle}>
+                Templates run in iTerm. Variables: <code>{'{projectPath}'}</code>
+                {' · '}
+                <code>{'{sessionId}'}</code> (resume only).
+              </div>
+
+              {/* Resume Command */}
+              <div style={{ marginBottom: '16px' }}>
+                <div style={fieldHeaderStyle}>
+                  <label style={fieldLabelStyle}>Resume command</label>
+                  {!isDefault && (
+                    <button onClick={handleReset} style={resetBtnStyle} title="Reset to default">
+                      <RotateCcw size={12} />
+                      Reset
                     </button>
-                  )
-                })}
+                  )}
+                </div>
+                <textarea
+                  value={customCommand}
+                  onChange={(e) => handleCommandChange(e.target.value)}
+                  placeholder={DEFAULT_COMMAND}
+                  style={textareaStyle}
+                />
               </div>
-            </div>
 
-            {/* Custom Command Section */}
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '8px'
-              }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: 'var(--foreground)'
-                }}>
-                  Custom Resume Command
-                </label>
-                {!isDefault && (
-                  <button
-                    onClick={handleReset}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '4px',
-                      borderRadius: '4px',
-                      color: 'var(--muted-foreground)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '12px'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = 'var(--secondary)'
-                      e.currentTarget.style.color = 'var(--foreground)'
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = 'none'
-                      e.currentTarget.style.color = 'var(--muted-foreground)'
-                    }}
-                    title="Reset to default"
-                  >
-                    <RotateCcw size={12} />
-                    Reset
-                  </button>
-                )}
-              </div>
-              
-              <textarea
-                value={customCommand}
-                onChange={(e) => handleCommandChange(e.target.value)}
-                placeholder="Enter custom command template..."
-                style={{
-                  width: '100%',
-                  minHeight: '80px',
-                  padding: '12px',
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px',
-                  backgroundColor: 'var(--background)',
-                  color: 'var(--foreground)',
-                  fontSize: '13px',
-                  fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
-                  resize: 'vertical',
-                  outline: 'none'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--accent)'
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(var(--accent-rgb), 0.1)'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border)'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
-              />
-
-              {/* Help text */}
-              <div style={{
-                marginTop: '8px',
-                padding: '12px',
-                backgroundColor: 'var(--secondary)',
-                borderRadius: '6px',
-                border: '1px solid var(--border)'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '8px'
-                }}>
-                  <Info size={14} style={{ 
-                    color: 'var(--muted-foreground)', 
-                    marginTop: '1px',
-                    flexShrink: 0 
-                  }} />
+              {/* New Chat Command */}
+              <div>
+                <div style={fieldHeaderStyle}>
+                  <label style={fieldLabelStyle}>New chat command</label>
+                  {!isNewChatDefault && (
+                    <button onClick={handleNewChatReset} style={resetBtnStyle} title="Reset to default">
+                      <RotateCcw size={12} />
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div>
-                    <div style={{
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      color: 'var(--foreground)',
-                      marginBottom: '4px'
-                    }}>
-                      Available variables:
-                    </div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: 'var(--muted-foreground)',
-                      fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
-                      lineHeight: '1.4'
-                    }}>
-                      <div><code>{'{projectPath}'}</code> - Full project directory path</div>
-                      <div><code>{'{sessionId}'}</code> - Session ID</div>
-                    </div>
+                    <div style={subLabelStyle}>Default project path (when none is picked)</div>
+                    <input
+                      type="text"
+                      value={newChatPath}
+                      onChange={(e) => handleNewChatPathChange(e.target.value)}
+                      placeholder="~"
+                      style={inputStyle}
+                    />
                   </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* New Chat Command Section */}
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '8px'
-              }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: 'var(--foreground)'
-                }}>
-                  New Chat Command
-                </label>
-                {!isNewChatDefault && (
-                  <button
-                    onClick={handleNewChatReset}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '4px',
-                      borderRadius: '4px',
-                      color: 'var(--muted-foreground)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '12px'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = 'var(--secondary)'
-                      e.currentTarget.style.color = 'var(--foreground)'
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = 'none'
-                      e.currentTarget.style.color = 'var(--muted-foreground)'
-                    }}
-                    title="Reset to default"
-                  >
-                    <RotateCcw size={12} />
-                    Reset
-                  </button>
-                )}
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: 'var(--muted-foreground)',
-                    marginBottom: '4px'
-                  }}>
-                    Project path — where a new chat should start
-                  </div>
-                  <input
-                    type="text"
-                    value={newChatPath}
-                    onChange={(e) => handleNewChatPathChange(e.target.value)}
-                    placeholder="~"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid var(--border)',
-                      borderRadius: '6px',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                      fontSize: '13px',
-                      fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
-                      outline: 'none'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--accent)'
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border)'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: 'var(--muted-foreground)',
-                    marginBottom: '4px'
-                  }}>
-                    Command template — run in iTerm when you click “Launch new chat”
-                  </div>
-                  <textarea
-                    value={newChatCommand}
-                    onChange={(e) => handleNewChatCommandChange(e.target.value)}
-                    placeholder="cd {projectPath}; agency claude --mcp workiq"
-                    style={{
-                      width: '100%',
-                      minHeight: '64px',
-                      padding: '12px',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                      fontSize: '13px',
-                      fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
-                      resize: 'vertical',
-                      outline: 'none'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--accent)'
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border)'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div style={{
-                marginTop: '8px',
-                padding: '12px',
-                backgroundColor: 'var(--secondary)',
-                borderRadius: '6px',
-                border: '1px solid var(--border)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                  <Info size={14} style={{ color: 'var(--muted-foreground)', marginTop: '1px', flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '4px' }}>
-                      Available variables:
-                    </div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: 'var(--muted-foreground)',
-                      fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
-                      lineHeight: '1.4'
-                    }}>
-                      <div><code>{'{projectPath}'}</code> - Project directory (from field above)</div>
-                    </div>
+                    <div style={subLabelStyle}>Template</div>
+                    <textarea
+                      value={newChatCommand}
+                      onChange={(e) => handleNewChatCommandChange(e.target.value)}
+                      placeholder={DEFAULT_NEW_CHAT_TEMPLATE}
+                      style={{ ...textareaStyle, minHeight: '64px' }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Session Preview Toggle */}
-            <div style={{ marginBottom: '24px' }}>
+            {/* ─────── Display ─────── */}
+            <div>
+              <div style={sectionHeadingStyle}>Display</div>
+
+              {/* Session Preview Toggle */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '16px',
+                padding: '14px 16px',
                 backgroundColor: 'var(--secondary)',
                 borderRadius: '8px',
-                border: '1px solid var(--border)'
+                border: '1px solid var(--border)',
+                marginBottom: '10px',
               }}>
                 <div>
-                  <div style={{
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: 'var(--foreground)',
-                    marginBottom: '4px'
-                  }}>
-                    Session Preview
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--foreground)' }}>
+                    Session preview on hover
                   </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: 'var(--muted-foreground)'
-                  }}>
-                    Show session preview overlay on hover
+                  <div style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '2px' }}>
+                    Show a small summary card when hovering a session row.
                   </div>
                 </div>
                 <label style={{
                   position: 'relative',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  flexShrink: 0,
                 }}>
                   <input
                     type="checkbox"
@@ -536,105 +340,73 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     style={{ display: 'none' }}
                   />
                   <div style={{
-                    width: '44px',
-                    height: '24px',
+                    width: '40px',
+                    height: '22px',
                     backgroundColor: showSessionPreview ? 'hsl(var(--accent-main-000))' : 'hsl(var(--text-500))',
-                    borderRadius: '12px',
+                    borderRadius: '11px',
                     position: 'relative',
-                    transition: 'background-color 0.2s'
+                    transition: 'background-color 0.2s',
                   }}>
                     <div style={{
-                      width: '18px',
-                      height: '18px',
+                      width: '16px',
+                      height: '16px',
                       backgroundColor: 'white',
                       borderRadius: '50%',
                       position: 'absolute',
                       top: '3px',
-                      left: showSessionPreview ? '23px' : '3px',
+                      left: showSessionPreview ? '21px' : '3px',
                       transition: 'left 0.2s',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)'
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
                     }} />
                   </div>
                 </label>
               </div>
-            </div>
-            
-            {/* Tool Preview Count */}
-            <div style={{ marginBottom: '24px' }}>
+
+              {/* Tool Preview Count */}
               <div style={{
-                padding: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+                padding: '14px 16px',
                 backgroundColor: 'var(--secondary)',
                 borderRadius: '8px',
-                border: '1px solid var(--border)'
+                border: '1px solid var(--border)',
               }}>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: 'var(--foreground)',
-                  marginBottom: '12px'
-                }}>
-                  Tool Sequence Preview Count
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--foreground)' }}>
+                    Tool sequence preview count
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '2px' }}>
+                    {toolPreviewCount === 0 ? 'All tools hidden until expanded.'
+                      : toolPreviewCount === 1 ? 'Show the most recent tool.'
+                      : `Show the ${toolPreviewCount} most recent tools.`}
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: 'var(--muted-foreground)',
-                  marginBottom: '16px'
-                }}>
-                  Number of recent tools to show in collapsed tool sequences
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <input
-                    type="number"
-                    min="0"
-                    max="99"
-                    value={toolPreviewCount}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value) || 0
-                      setToolPreviewCount(Math.max(0, Math.min(99, value)))
-                    }}
-                    style={{
-                      width: '80px',
-                      padding: '6px 12px',
-                      backgroundColor: 'var(--background)',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border)',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      textAlign: 'center',
-                      color: 'var(--foreground)',
-                      outline: 'none',
-                      fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--accent)'
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(var(--accent-rgb), 0.1)'
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border)'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }}
-                  />
-                  <span style={{
-                    fontSize: '13px',
-                    color: 'var(--muted-foreground)'
-                  }}>
-                    tools
-                  </span>
-                </div>
-                <div style={{
-                  marginTop: '8px',
-                  fontSize: '11px',
-                  color: 'var(--muted-foreground)',
-                  fontStyle: 'italic'
-                }}>
-                  {toolPreviewCount === 0 ? 'All tools will be hidden until expanded' : 
-                   toolPreviewCount === 1 ? 'Show only the most recent tool' :
-                   `Show the ${toolPreviewCount} most recent tools`}
-                </div>
+                <input
+                  type="number"
+                  min="0"
+                  max="99"
+                  value={toolPreviewCount}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0
+                    setToolPreviewCount(Math.max(0, Math.min(99, value)))
+                  }}
+                  style={{
+                    width: '68px',
+                    padding: '6px 10px',
+                    backgroundColor: 'var(--background)',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    textAlign: 'center',
+                    color: 'var(--foreground)',
+                    outline: 'none',
+                    fontFamily: 'SF Mono, Monaco, Cascadia Code, monospace',
+                    flexShrink: 0,
+                  }}
+                />
               </div>
             </div>
           </div>

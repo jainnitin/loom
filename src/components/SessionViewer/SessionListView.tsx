@@ -231,20 +231,55 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
 
   const displayName = selectedProject.name.split('/').pop() || selectedProject.name
 
+  const weekDelta = stats.sessionsThisWeek - stats.sessionsLastWeek
+
   return (
     <div className="dash-root">
       <div className="dash-inner proj-compact" style={{ ['--tag-hue' as any]: hueForProject(displayName) }}>
-        <ComposeHero
-          greeting="What do you want to explore or resume?"
-          caption={
-            <>
-              {stats.sessionsTotal} sessions · {stats.messagesTotal.toLocaleString()} messages
-              {stats.latestMtime && <> · last activity {formatRelativeTime(stats.latestMtime)}</>}
-              <span style={{ marginLeft: 8, opacity: 0.65, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                {selectedProject.name}
+        <header className="proj-hero">
+          <div className="proj-hero-title-row">
+            <Folder size={18} className="proj-hero-icon" />
+            <h1 className="proj-hero-name">{displayName}</h1>
+          </div>
+          <div className="proj-hero-path">{selectedProject.name}</div>
+          <div className="proj-hero-stats">
+            <span className="proj-stat">
+              <strong>{stats.sessionsTotal}</strong>
+              <span className="proj-stat-label">
+                {stats.sessionsTotal === 1 ? 'session' : 'sessions'}
               </span>
-            </>
-          }
+            </span>
+            <span className="proj-stat-sep">·</span>
+            <span className="proj-stat">
+              <strong>{stats.messagesTotal.toLocaleString()}</strong>
+              <span className="proj-stat-label">
+                {stats.messagesTotal === 1 ? 'message' : 'messages'}
+              </span>
+            </span>
+            <span className="proj-stat-sep">·</span>
+            <span className="proj-stat">
+              <strong>{stats.sessionsThisWeek}</strong>
+              <span className="proj-stat-label">this week</span>
+              {stats.sessionsLastWeek > 0 && weekDelta !== 0 && (
+                <span className="proj-stat-hint">
+                  {weekDelta > 0 ? '↑' : '↓'} {Math.abs(weekDelta)} vs last
+                </span>
+              )}
+            </span>
+            {stats.latestMtime && (
+              <>
+                <span className="proj-stat-sep">·</span>
+                <span className="proj-stat">
+                  <span className="proj-stat-label">
+                    last activity {formatRelativeTime(stats.latestMtime)}
+                  </span>
+                </span>
+              </>
+            )}
+          </div>
+        </header>
+
+        <ComposeHero
           defaultTargetPath={selectedProject.name}
           projects={projects}
         />

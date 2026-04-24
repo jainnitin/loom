@@ -9,7 +9,7 @@ import { SettingsModal } from '../Settings/SettingsModal'
 import { useAppStore } from '@/store/appStore'
 
 export const Layout: React.FC = () => {
-  const { sidebarCollapsed, sidebarWidth, toggleSidebar, activeTabId, tabs } = useAppStore()
+  const { sidebarCollapsed, sidebarWidth, toggleSidebar, activeTabId, tabs, selectedProjectPath } = useAppStore()
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   
@@ -105,10 +105,23 @@ export const Layout: React.FC = () => {
   }, [])
   
   const activeTab = tabs.find(t => t.id === activeTabId)
-  const isDashboard = activeTab?.type === 'dashboard'
-  const isProjectTab = activeTab?.type === 'project'
-  const isSessionTab = activeTab?.type === 'session'
-  
+  // View resolution:
+  //   active session tab → SessionViewer
+  //   active dashboard tab → Dashboard
+  //   no active tab + selected project → SessionListView (project view, not a tab)
+  //   no active tab + no project → Dashboard fallback
+  // (Project tabs were removed — projects are sidebar-driven, not tabs.)
+  let view: React.ReactNode
+  if (activeTab?.type === 'session') {
+    view = <SessionViewer tab={activeTab} />
+  } else if (activeTab?.type === 'dashboard') {
+    view = <Dashboard />
+  } else if (!activeTab && selectedProjectPath) {
+    view = <SessionListView projectPath={selectedProjectPath} />
+  } else {
+    view = <Dashboard />
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
       <TabBar />
@@ -126,17 +139,7 @@ export const Layout: React.FC = () => {
           flexDirection: 'column',
           transition: 'margin-left 0.2s ease'
         }}>
-          {isDashboard ? (
-            <Dashboard />
-          ) : isProjectTab ? (
-            <SessionListView projectPath={activeTab.projectPath} />
-          ) : isSessionTab ? (
-            <SessionViewer tab={activeTab} />
-          ) : !activeTab ? (
-            <Dashboard />
-          ) : (
-            <Dashboard />
-          )}
+          {view}
         </main>
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />

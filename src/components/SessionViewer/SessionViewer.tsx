@@ -12,7 +12,7 @@ interface SessionViewerProps {
 }
 
 export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
-  const { messages, setMessages, sessionsByProject, selectProject, setActiveTab, loadSessionsForProject, createProjectTab, trashSession } = useAppStore()
+  const { messages, setMessages, sessionsByProject, selectProject, setActiveTab, loadSessionsForProject, trashSession } = useAppStore()
   // Auto-scroll is always on; Live/Offline indicator removed as unhelpful chrome.
   const autoScroll = true
   const [currentMessageIndex, setCurrentMessageIndex] = useState<number | undefined>()
@@ -383,7 +383,7 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
         <div className="sv-breadcrumb">
           <button
             className="sv-crumb-project"
-            onClick={() => createProjectTab(tab.projectPath)}
+            onClick={() => selectProject(tab.projectPath)}
             title={tab.projectPath}
           >
             {tab.projectPath.split('/').pop() || 'Unknown Project'}

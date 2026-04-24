@@ -1,6 +1,7 @@
 import React from 'react'
 import { X, Plus, BarChart3, Folder, PanelLeft, Tag } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
+import { ThemeSwitcher } from './ThemeSwitcher'
 
 export const TabBar: React.FC = () => {
   const { tabs, activeTabId, setActiveTab, removeTab, sidebarCollapsed, sidebarWidth, toggleSidebar, ensureDashboardTab, sessionsByProject } = useAppStore()
@@ -50,8 +51,8 @@ export const TabBar: React.FC = () => {
         }}>
           {tabs.map((tab) => {
             const tabCount = tabs.length
-            const maxWidth = tabCount > 6 ? 180 : tabCount > 4 ? 200 : 240
-            const minWidth = 120
+            const maxWidth = tabCount > 8 ? 120 : tabCount > 6 ? 160 : tabCount > 4 ? 200 : 240
+            const minWidth = tabCount > 8 ? 60 : tabCount > 6 ? 80 : tabCount > 4 ? 100 : 120
             
             // Look up the session live so custom labels set AFTER the tab was
             // opened still reflect in the tab label.
@@ -135,6 +136,10 @@ export const TabBar: React.FC = () => {
         
         {/* Window-drag region — drag here to move the window */}
         <div data-tauri-drag-region style={{ flex: 1, alignSelf: 'stretch' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ThemeSwitcher />
+        </div>
       </div>
     </div>
   )
