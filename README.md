@@ -16,14 +16,14 @@ Claude Code is great for doing the work, but finding what you did two weeks ago 
 
 Loom is a Tauri app — Node builds the React/Vite frontend, Rust compiles the native macOS shell.
 
-Check what you have, install whichever's missing:
+Each line below installs only if the tool is missing (`||` short-circuits when the version check succeeds):
 
 ```bash
-node --version    # need ≥ 20      → brew install node
-cargo --version   # any recent     → curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+node --version  || brew install node
+cargo --version || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Restart your shell after installing rustup so `cargo` lands on `$PATH`. Then build and launch the Mac app:
+If rustup ran, restart your shell so `cargo` lands on `$PATH`. Then build and launch the Mac app:
 
 ```bash
 git clone https://github.com/jainnitin/loom.git
@@ -34,7 +34,12 @@ npm start          # builds Loom.app and opens it
 
 The build is ad-hoc signed locally — on first launch macOS will block it; right-click the app → **Open** → **Open**. Drag `Loom.app` into `/Applications` if you want it in Spotlight.
 
-`npm run build` is the same build without auto-open (use it when distributing the DMG). `npm run dev` runs the desktop app against Vite's dev server with HMR for frontend work. All three preflight-check for `cargo`.
+Other scripts:
+
+- `npm run build` — same build as `npm start` but doesn't auto-open. Use this when distributing the DMG.
+- `npm run dev` — runs the desktop app against Vite's dev server with HMR. Use this for frontend work.
+
+All three preflight-check for `cargo` and bail with the rustup line if it's missing.
 
 ## Stack
 
