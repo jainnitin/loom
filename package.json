@@ -1,0 +1,50 @@
+{
+  "name": "loom",
+  "version": "1.0.5",
+  "description": "Loom — a desktop workspace for your Claude Code CLI sessions. Browse, resume, and launch new chats without leaving your flow.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jainnitin/loom.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "dev:vite": "vite",
+    "build": "tauri build",
+    "build:vite": "vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "keywords": [
+    "claude",
+    "session",
+    "viewer"
+  ],
+  "author": "Nitin Jain",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.7",
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@vitejs/plugin-react": "^5.2.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "typescript": "~5.9",
+    "vite": "^7.3.2"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "lucide-react": "^1.9.0",
+    "next-themes": "^0.4.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.1",
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4.1.7",
+    "zustand": "^5.0.5"
+  }
+}

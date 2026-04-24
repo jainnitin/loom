@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+// TypeScript 파일을 직접 실행하기 위해 ts-node 사용
+const tsNodePath = path.join(__dirname, 'node_modules', '.bin', 'ts-node');
+const scriptPath = path.join(__dirname, 'claude-viewer.ts');
+
+// CLAUDECODE 환경변수 확인
+if (process.env.CLAUDECODE !== '1') {
+  console.error('Error: This command must be run inside Claude CLI (CLAUDECODE=1)');
+  process.exit(1);
+}
+
+// ts-node로 TypeScript 스크립트 실행
+const child = spawn(tsNodePath, [scriptPath], {
+  stdio: 'inherit',
+  env: process.env
+});
+
+child.on('error', (error) => {
+  console.error('Failed to start claude-viewer:', error);
+  process.exit(1);
+});
+
+child.on('exit', (code) => {
+  process.exit(code || 0);
+});
