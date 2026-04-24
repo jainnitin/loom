@@ -1959,7 +1959,6 @@ body {
   width: 78px; /* room for 3 macOS traffic lights */
   flex-shrink: 0;
   height: 100%;
-  -webkit-app-region: drag;
 }
 
 .sidebar-top-strip-actions {

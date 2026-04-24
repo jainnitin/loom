@@ -107,8 +107,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenPalette, onOpenSettings 
           zIndex: 10,
         }}
       >
-        {/* Top strip — left 80px reserved for macOS traffic lights, icons on the right. */}
-        <div className="sidebar-top-strip">
+        {/* Top strip — left 80px reserved for macOS traffic lights, icons on the right.
+            Whole strip is a window-drag region; the action buttons inside are
+            interactive elements which Tauri auto-excludes from dragging. */}
+        <div data-tauri-drag-region className="sidebar-top-strip">
           <div className="sidebar-top-strip-traffic" />
           <div className="sidebar-top-strip-actions">
             <button

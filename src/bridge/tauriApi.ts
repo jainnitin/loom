@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen, type UnlistenFn } from '@tauri-apps/api/event'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
 type DeepLinkParams = {
   sessionId?: string
@@ -95,9 +96,40 @@ const api: LoomApi = {
     invoke<OpResult>('fs_trash_session', { filePath }),
 }
 
+// Walk up from the click target. Honor `data-tauri-drag-region` on any
+// ancestor, but bail if an interactive element sits between the click and
+// that ancestor (so buttons/inputs inside the drag region keep their click).
+function installDragRegionHandler() {
+  document.addEventListener('mousedown', async (e) => {
+    if (e.button !== 0) return
+    let el = e.target as HTMLElement | null
+    while (el) {
+      if (el.matches('button, input, textarea, select, a, [role="button"], [contenteditable="true"]')) {
+        return
+      }
+      if (el.hasAttribute('data-tauri-drag-region')) {
+        if (el.getAttribute('data-tauri-drag-region') === 'false') return
+        e.preventDefault()
+        try {
+          if (e.detail === 2) {
+            await getCurrentWindow().toggleMaximize()
+          } else {
+            await getCurrentWindow().startDragging()
+          }
+        } catch (err) {
+          console.error('[drag-region]', err)
+        }
+        return
+      }
+      el = el.parentElement
+    }
+  })
+}
+
 export function installTauriBridge() {
   if (typeof window === 'undefined') return
   ;(window as unknown as { api: LoomApi }).api = api
+  installDragRegionHandler()
 }
 
 export type { LoomApi }

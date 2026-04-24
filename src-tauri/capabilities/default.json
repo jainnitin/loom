@@ -4,6 +4,8 @@
   "description": "Default capability — only `core:default` is needed since every privileged action happens in Rust commands, not via direct JS → plugin calls.",
   "windows": ["*"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-toggle-maximize"
   ]
 }

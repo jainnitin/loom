@@ -1,7 +1,6 @@
 import React from 'react'
 import { X, Plus, BarChart3, Folder, PanelLeft, Tag } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
-import { ThemeSwitcher } from './ThemeSwitcher'
 
 export const TabBar: React.FC = () => {
   const { tabs, activeTabId, setActiveTab, removeTab, sidebarCollapsed, sidebarWidth, toggleSidebar, ensureDashboardTab, sessionsByProject } = useAppStore()
@@ -20,28 +19,23 @@ export const TabBar: React.FC = () => {
       transition: 'left 0.2s ease',
       zIndex: 20
     }}>
-      <div style={{
+      <div data-tauri-drag-region style={{
         height: '40px',
         display: 'flex',
         alignItems: 'center',
         paddingLeft: '12px',
         paddingRight: '12px',
         fontSize: '13px',
-        WebkitAppRegion: 'drag'
-      } as React.CSSProperties}>
+      }}>
         {/* Spacer for traffic lights on macOS - only when sidebar is collapsed */}
         {sidebarCollapsed && (
-          <div style={{ width: '68px', flexShrink: 0 }} />
+          <div data-tauri-drag-region style={{ width: '68px', flexShrink: 0, alignSelf: 'stretch' }} />
         )}
-        
+
         {sidebarCollapsed && (
           <button
             className="btn-icon"
-            style={{ 
-              padding: '6px', 
-              marginRight: '8px',
-              WebkitAppRegion: 'no-drag'
-            } as React.CSSProperties}
+            style={{ padding: '6px', marginRight: '8px' }}
             onClick={toggleSidebar}
             title="Show sidebar (Cmd+B)"
           >
@@ -52,9 +46,8 @@ export const TabBar: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '2px',
-          WebkitAppRegion: 'no-drag',
-          overflow: 'hidden'
-        } as React.CSSProperties}>
+          overflow: 'hidden',
+        }}>
           {tabs.map((tab) => {
             const tabCount = tabs.length
             const maxWidth = tabCount > 6 ? 180 : tabCount > 4 ? 200 : 240
@@ -140,17 +133,8 @@ export const TabBar: React.FC = () => {
           )}
         </div>
         
-        {/* Spacer for draggable area */}
-        <div style={{ flex: 1 }} />
-        
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          WebkitAppRegion: 'no-drag'
-        } as React.CSSProperties}>
-          <ThemeSwitcher />
-        </div>
+        {/* Window-drag region — drag here to move the window */}
+        <div data-tauri-drag-region style={{ flex: 1, alignSelf: 'stretch' }} />
       </div>
     </div>
   )

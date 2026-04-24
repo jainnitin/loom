@@ -46,6 +46,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ searchQuery = '' }) =>
   const [showEndMarker, setShowEndMarker] = useState(false)
 
   const handleProjectDragStart = (e: React.DragEvent, project: Project) => {
+    // text/plain is the broadly-supported fallback; WKWebView can drop payloads
+    // from custom MIME types, so always carry the name in text/plain too.
+    e.dataTransfer.setData('text/plain', project.name)
     e.dataTransfer.setData('text/x-loom-project', project.name)
     e.dataTransfer.effectAllowed = 'move'
     setDraggingProject(project.name)
@@ -63,7 +66,14 @@ export const ProjectList: React.FC<ProjectListProps> = ({ searchQuery = '' }) =>
   // tracks the target, and suppresses the bucket-level drop handler when active.
   const handlePinnedRowDragOver = (e: React.DragEvent, project: Project, isLast: boolean) => {
     if (!draggingProject) return
-    if (!pinnedProjects[draggingProject]) return  // Cross-bucket drops handled at bucket level
+    // Cross-bucket drag (an unpinned project hovering over a pinned row): still
+    // accept the drop here so the OS shows the move cursor and the drop event
+    // is allowed to fire, then let the bucket-level handler classify it.
+    if (!pinnedProjects[draggingProject]) {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+      return
+    }
     if (project.name === draggingProject) return  // No-op on self
     e.preventDefault()
     e.stopPropagation()
@@ -114,7 +124,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ searchQuery = '' }) =>
   }
 
   const handleBucketDrop = (e: React.DragEvent, bucket: BucketKey) => {
-    const name = e.dataTransfer.getData('text/x-loom-project') || draggingProject
+    const name = e.dataTransfer.getData('text/x-loom-project')
+      || e.dataTransfer.getData('text/plain')
+      || draggingProject
     if (!name) return
     e.preventDefault()
     const isPinned = !!pinnedProjects[name]
