@@ -7,7 +7,7 @@ interface SettingsModalProps {
   onClose: () => void
 }
 
-const DEFAULT_COMMAND = 'cd {projectPath} && claude --resume {sessionId}'
+const DEFAULT_COMMAND = 'cd {projectPath}; claude --resume {sessionId}'
 
 const sectionHeadingStyle: React.CSSProperties = {
   fontSize: '11px',

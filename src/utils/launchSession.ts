@@ -1,4 +1,4 @@
-const DEFAULT_TEMPLATE = 'cd {projectPath} && claude --resume {sessionId}'
+const DEFAULT_TEMPLATE = 'cd {projectPath}; claude --resume {sessionId}'
 // Tilde is shell-expanded by zsh/bash to the current user's $HOME, so this
 // stays portable across machines without needing to round-trip through IPC.
 export const DEFAULT_NEW_CHAT_PATH = '~'

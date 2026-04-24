@@ -179,7 +179,7 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
 
     // Get custom command from localStorage
     const customCommand = localStorage.getItem('claude-viewer-custom-command')
-    const template = customCommand || 'cd {projectPath} && claude --resume {sessionId}'
+    const template = customCommand || 'cd {projectPath}; claude --resume {sessionId}'
     const command = template
       .replace('{projectPath}', projectPath)
       .replace('{sessionId}', sessionId)

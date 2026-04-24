@@ -71,29 +71,33 @@ export const Layout: React.FC = () => {
   }, [])
   
   useEffect(() => {
-    // Handle keyboard shortcuts
+    // Global shortcuts. Skip the bare-key zoom shortcuts when the user is
+    // typing in a text field, otherwise `-`, `+`, `=` get hijacked from
+    // inputs / textareas (e.g. the Settings command templates contain `--`).
     const handleKeydown = (e: KeyboardEvent) => {
-      
-      // Note: Cmd+T, Cmd+N, Cmd+W, Cmd+B are now handled by Electron menu
-      // Only handle shortcuts that aren't in the menu
-      
-      // - to zoom out (decrease font size)
-      if (e.key === '-' && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+      const t = e.target as HTMLElement | null
+      const typing =
+        !!t &&
+        (t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA' ||
+          (t as any).isContentEditable)
+
+      if (!typing && e.key === '-' && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
         e.preventDefault()
         const currentZoom = parseFloat(document.documentElement.style.fontSize || '16px')
         const newZoom = Math.max(currentZoom - 1, 10)
         document.documentElement.style.fontSize = `${newZoom}px`
       }
-      
-      // + or = to zoom in (increase font size)
-      if ((e.key === '+' || e.key === '=') && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+
+      if (!typing && (e.key === '+' || e.key === '=') && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
         e.preventDefault()
         const currentZoom = parseFloat(document.documentElement.style.fontSize || '16px')
         const newZoom = Math.min(currentZoom + 1, 24)
         document.documentElement.style.fontSize = `${newZoom}px`
       }
-      
-      // ⌘K / Ctrl+K → command palette
+
+      // ⌘K / Ctrl+K — command palette (always available, even while typing
+      // in the palette's own input is fine since we toggle it off).
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k' && !e.shiftKey && !e.altKey) {
         e.preventDefault()
         setPaletteOpen((v) => !v)
