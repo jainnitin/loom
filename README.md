@@ -14,60 +14,27 @@ Claude Code is great for doing the work, but finding what you did two weeks ago 
 
 ## Setup
 
-Loom is a Tauri app, so it needs two toolchains:
+Loom is a Tauri app — Node builds the React/Vite frontend, Rust compiles the native macOS shell.
 
-- **Node 20+** — builds the React/Vite frontend (the UI you see).
-- **Rust (cargo)** — compiles the native macOS shell (the `.app` binary that hosts the window and talks to the filesystem / iTerm).
-
-**1. Check Node ≥ 20:**
+Check what you have, install whichever's missing:
 
 ```bash
-node --version
+node --version    # need ≥ 20      → brew install node
+cargo --version   # any recent     → curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-If the command isn't found or the version is lower than 20, install with Homebrew:
-
-```bash
-brew install node
-```
-
-**2. Check Rust (cargo):**
-
-```bash
-cargo --version
-```
-
-If the command isn't found, install via [rustup](https://rustup.rs):
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-
-Restart your shell after the install finishes so `cargo` lands on `$PATH`, then re-run `cargo --version` to confirm.
-
-**3. Clone, install, run:**
+Restart your shell after installing rustup so `cargo` lands on `$PATH`. Then build and launch the Mac app:
 
 ```bash
 git clone https://github.com/jainnitin/loom.git
 cd loom
 npm install
-npm run dev          # development build with HMR
-# or
-npm run build        # release DMG → src-tauri/target/release/bundle/
+npm start          # builds Loom.app and opens it
 ```
 
-`npm run dev` and `npm run build` run a preflight check that fails fast with the rustup install line if `cargo` is missing.
+The build is ad-hoc signed locally — on first launch macOS will block it; right-click the app → **Open** → **Open**. Drag `Loom.app` into `/Applications` if you want it in Spotlight.
 
-The release build is ad-hoc signed locally, so on first launch macOS will block it — right-click the app → **Open** → **Open**.
-
-## Configuration
-
-Settings (⌘, or gear in the sidebar):
-
-- **New Chat Command** — template with `{projectPath}` and `{query}` placeholders.
-- **Resume Command** — default `cd {projectPath}; claude --resume {sessionId}`.
-- **Default project path** — where a new chat lands if none is picked. `~` by default.
-- Theme, hover-preview toggle, tool-sequence preview count.
+`npm run build` is the same build without auto-open (use it when distributing the DMG). `npm run dev` runs the desktop app against Vite's dev server with HMR for frontend work. All three preflight-check for `cargo`.
 
 ## Stack
 
