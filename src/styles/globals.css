@@ -65,13 +65,17 @@ input[type="range"]::-moz-range-thumb:hover {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Light Mode (Claude Theme) - Default */
+/* Light Mode (Claude Theme) - Default
+   Tokens synced verbatim from handoff_dashboard_redesign/colors_and_type.css.
+   The previous values had a darker, more saturated accent and firmer borders
+   than the design system; sticking to the canonical extracts keeps light mode
+   matching the prototypes. */
 :root,
 [data-theme="light"] {
-  --accent-brand: 15 72% 50%;
-  --accent-main-000: 15 68% 46%;
-  --accent-main-100: 15 68% 46%;
-  --accent-main-200: 15 72% 52%;
+  --accent-brand: 15 63.1% 59.6%;
+  --accent-main-000: 15 55.6% 52.4%;
+  --accent-main-100: 15 55.6% 52.4%;
+  --accent-main-200: 15 63.1% 59.6%;
   --accent-main-900: 0 0% 0%;
   --accent-pro-000: 251 34.2% 33.3%;
   --accent-pro-100: 251 40% 45.1%;
@@ -83,14 +87,14 @@ input[type="range"]::-moz-range-thumb:hover {
   --accent-secondary-900: 211 72% 90%;
   --bg-000: 0 0% 100%;
   --bg-100: 48 33.3% 97.1%;
-  --bg-200: 53 28.6% 94%;
-  --bg-300: 48 25% 90%;
-  --bg-400: 50 20.7% 86%;
-  --bg-500: 50 20.7% 86%;
-  --border-100: 48 20% 86%;
-  --border-200: 48 20% 82%;
-  --border-300: 48 20% 78%;
-  --border-400: 48 20% 78%;
+  --bg-200: 53 28.6% 94.5%;
+  --bg-300: 48 25% 92.2%;
+  --bg-400: 50 20.7% 88.6%;
+  --bg-500: 50 20.7% 88.6%;
+  --border-100: 48 25% 92.2%;
+  --border-200: 48 25% 92.2%;
+  --border-300: 48 22% 88%;
+  --border-400: 48 22% 88%;
   --danger-000: 0 61.4% 22.4%;
   --danger-100: 0 58.6% 34.1%;
   --danger-200: 0 58.6% 34.1%;
@@ -98,12 +102,12 @@ input[type="range"]::-moz-range-thumb:hover {
   --oncolor-100: 0 0% 100%;
   --oncolor-200: 60 6.7% 97.1%;
   --oncolor-300: 60 6.7% 97.1%;
-  --text-000: 60 4% 7%;
-  --text-100: 60 4% 7%;
-  --text-200: 60 3% 20%;
-  --text-300: 60 3% 28%;
-  --text-400: 51 5% 33%;
-  --text-500: 51 5% 38%;
+  --text-000: 60 2.6% 7.6%;
+  --text-100: 60 2.6% 7.6%;
+  --text-200: 60 2.5% 23.3%;
+  --text-300: 60 2.5% 28%;
+  --text-400: 51 3.1% 43.7%;
+  --text-500: 51 3.1% 48%;
 
   /* Mapped Variables for Compatibility */
   --background: hsl(var(--bg-000));
@@ -620,11 +624,11 @@ body {
 
 .dash-inner {
   max-width: 1280px;
-  margin: 0 auto;
+  margin: 0;
   padding: 40px 48px 64px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 18px;
 }
 
 /* ---- Recent activity list ---- */
@@ -674,9 +678,9 @@ body {
 .dash-compose-hero {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-width: 860px;
-  padding: 24px 0 12px;
+  gap: 10px;
+  max-width: 100%;
+  padding: 0;
   width: 100%;
 }
 
@@ -714,14 +718,14 @@ body {
 
 .dash-compose {
   position: relative;
-  margin-top: 10px;
-  border: 1px solid hsl(var(--border) / 0.8);
-  border-radius: 999px;
-  background: hsl(var(--bg-100) / 0.7);
-  padding: 6px 6px 6px 20px;
+  margin-top: 0;
+  border: 1px solid hsl(var(--border) / 0.85);
+  border-radius: 10px;
+  background: hsl(var(--bg-100) / 0.85);
+  padding: 10px 12px 10px 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -753,18 +757,23 @@ body {
 
 .dash-compose-send {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: hsl(var(--muted) / 0.5);
+  background: transparent;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 6px;
   color: var(--muted-foreground);
   cursor: pointer;
   padding: 0;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+  opacity: 0.7;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, transform 0.12s ease;
+}
+.dash-compose-send:hover {
+  opacity: 1;
+  color: var(--foreground);
 }
 
 .dash-compose-send.is-active {
@@ -950,28 +959,20 @@ body {
 }
 
 /* =========================================================== */
-/* Project view — compact hero                                   */
+/* Project view — single column, narrower than Dashboard         */
+/* (no right rail). Inherits gap / padding rhythm from .dash-inner */
+/* so it flows in lockstep with the Dashboard.                   */
 /* =========================================================== */
 .dash-inner.proj-compact {
-  max-width: 1040px;
-  gap: 16px;
-  padding: 24px 32px 40px;
+  max-width: 1080px;
 }
-
-/* On a project page the project name is the page title; the compose hero
-   below it is a secondary action. Scale the greeting down so the hierarchy
-   reads name → prompt → input rather than competing with the project header. */
-.proj-compact .dash-compose-hero { padding-top: 4px; gap: 10px; }
-.proj-compact .dash-compose-greeting { font-size: 24px; }
-.proj-compact .dash-compose-glyph { width: 16px; height: 16px; opacity: 0.7; }
-.proj-compact .dash-compose-title-row { gap: 10px; }
 
 .proj-hero {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
 }
 
 .proj-hero-title-row {
@@ -988,7 +989,7 @@ body {
 
 .proj-hero-name {
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--foreground);
@@ -997,28 +998,41 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 520px;
-  line-height: 1.15;
+  max-width: 640px;
+  line-height: 1.1;
 }
 
 .proj-hero-path {
-  font-size: 12px;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.01em;
   color: var(--muted-foreground);
   opacity: 0.65;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding-left: 32px;
 }
 
 .proj-hero-stats {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 14px;
   flex-wrap: wrap;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.01em;
   color: var(--muted-foreground);
+  padding-left: 32px;
+  font-variant-numeric: tabular-nums;
+}
+.proj-hero-stats .proj-stat-label {
+  font-family: var(--font-mono);
+}
+.proj-hero-stats strong {
+  font-family: var(--font-mono);
+  font-weight: 700;
 }
 
 .proj-stat {
@@ -2385,7 +2399,7 @@ body {
   right: 0;
   z-index: 2500;
   min-width: 220px;
-  background: var(--bg-100, var(--background));
+  background: hsl(var(--bg-100));
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: 0 12px 28px hsl(0 0% 0% / 0.25), 0 2px 6px hsl(0 0% 0% / 0.15);
@@ -2694,28 +2708,32 @@ body {
 }
 
 .rail-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-foreground);
-  margin-bottom: 8px;
+  opacity: 0.85;
+  margin-bottom: 10px;
 }
 
 .rail-prompt {
-  font-size: 14px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
   line-height: 1.55;
   color: var(--foreground);
   letter-spacing: -0.005em;
-  font-weight: 500;
+  font-weight: 400;
   white-space: pre-wrap;
 }
 
 .rail-recap {
+  font-family: var(--font-body);
   font-size: 13px;
   line-height: 1.6;
   color: var(--foreground);
-  opacity: 0.9;
+  opacity: 0.92;
   white-space: pre-wrap;
 }
 .rail-recap p + p { margin-top: 0.5em; }
@@ -2791,4 +2809,842 @@ body {
   .hide-on-small {
     display: none !important;
   }
+}
+
+/* =============================================================
+   Utilitarian redesign — Dashboard / Project / Session
+   Terminal/IDE-adjacent posture: dense single-line rows,
+   pill-shaped filter chips with chip-expand, monospace timestamps.
+   ============================================================= */
+
+/* ---- Greeting + inline mono stats bar (Dashboard hero) ---- */
+.dash-hero {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 4px 0 8px;
+}
+.dash-hero-greeting {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--foreground);
+}
+.dash-hero-greeting em {
+  font-style: italic;
+  font-weight: 500;
+  color: hsl(var(--accent-main-000));
+}
+.dash-stats {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.dash-stats span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.dash-stats b {
+  color: var(--foreground);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.dash-stats .is-accent,
+.dash-stats .is-accent b {
+  color: hsl(var(--accent-main-000));
+}
+.dash-stats .is-accent svg {
+  margin: 0 1px 0 -1px;
+  vertical-align: -1px;
+}
+
+@media (max-width: 880px) {
+  .dash-hero-greeting { font-size: 24px; }
+  .dash-stats { font-size: 11px; gap: 12px; }
+}
+
+/* ---- Compose extension: prompt glyph + ⌘↵ keyboard hint ---- */
+.dash-compose-glyph-prefix {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--accent-main-000));
+  opacity: 0.85;
+  user-select: none;
+  letter-spacing: -0.04em;
+  flex-shrink: 0;
+  margin-right: -4px;
+}
+.dash-compose-key {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+  letter-spacing: 0.04em;
+  border: 1px solid hsl(var(--border) / 0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* The compose input on the redesign uses mono 13px so the prompt glyph
+   reads as a peer of the placeholder text. */
+.dash-compose.is-utility .dash-compose-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+/* ---- Filter strip — peer pill chips with chip-expand pattern ---- */
+.fs-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+  letter-spacing: 0.02em;
+}
+.fs-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  white-space: nowrap;
+}
+.fs-chip:hover {
+  border-color: hsl(var(--accent-main-000) / 0.4);
+  color: var(--foreground);
+}
+.fs-chip.is-active {
+  background: hsl(var(--accent-main-000) / 0.12);
+  border-color: hsl(var(--accent-main-000) / 0.4);
+  color: hsl(var(--accent-main-000));
+}
+.fs-chip-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+  padding-left: 6px;
+  border-left: 1px solid currentColor;
+  margin-left: 2px;
+}
+.fs-chip svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.fs-trigger .fs-key {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted-foreground);
+  opacity: 0.55;
+  border: 1px solid hsl(var(--border) / 0.6);
+  padding: 0 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  margin-left: 2px;
+}
+
+/* Inline-expanded search — replaces the trigger chip in place. */
+.fs-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 9px;
+  border: 1px solid hsl(var(--accent-main-000) / 0.45);
+  border-radius: 999px;
+  background: hsl(var(--bg-100) / 0.7);
+  box-shadow: 0 0 0 3px hsl(var(--accent-main-000) / 0.06);
+  transition: all 0.15s ease;
+  flex: 1 1 260px;
+  min-width: 200px;
+  max-width: 460px;
+  animation: fs-fade-in 120ms ease;
+}
+@keyframes fs-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.fs-search-icon {
+  color: hsl(var(--accent-main-000));
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.85;
+}
+.fs-search-input {
+  flex: 1;
+  height: 22px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  letter-spacing: -0.005em;
+  min-width: 0;
+}
+.fs-search-input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.55;
+}
+.fs-search-result {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: hsl(var(--accent-main-000));
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  padding-left: 6px;
+  border-left: 1px solid hsl(var(--border) / 0.6);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.fs-search-clear {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  flex-shrink: 0;
+  transition: background-color 0.12s ease, color 0.12s ease, opacity 0.12s ease;
+}
+.fs-search-clear:hover {
+  background: hsl(var(--muted) / 0.6);
+  color: var(--foreground);
+  opacity: 1;
+}
+
+/* ---- Day group header (italic Fraunces label + mono session count) ---- */
+.day-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0 6px;
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+  margin-bottom: 2px;
+}
+.day-header-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
+  opacity: 0.85;
+  letter-spacing: 0.005em;
+}
+.day-header-meta {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+}
+
+/* ---- Single-line session row, expands on hover (replaces .proj-row) ---- */
+.s-row {
+  display: grid;
+  grid-template-columns: 22px 78px 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13.5px;
+  line-height: 1.4;
+  position: relative;
+  transition: background-color 0.12s ease, padding 0.12s ease, box-shadow 0.12s ease;
+}
+/* Hover OR keyboard-focused: row gets accent left-rule, accent tint, and
+   expands vertically so the subline + Resume button can fade in. */
+.s-row:hover,
+.s-row.is-focused {
+  background: hsl(var(--accent-main-000) / 0.08);
+  box-shadow: inset 2px 0 0 hsl(var(--accent-main-000));
+  padding-top: 12px;
+  padding-bottom: 14px;
+}
+.s-row.is-hidden { opacity: 0.55; }
+.s-row.is-hidden:hover { opacity: 0.92; }
+.s-row.is-hidden .s-row-title-text { font-style: italic; }
+
+/* tag-cell: 22px slot for the named-session tag icon */
+.s-row-tagcell {
+  width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: hsl(var(--accent-main-000));
+  flex-shrink: 0;
+}
+.s-row-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+.s-row-title-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+.s-row-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--foreground);
+  letter-spacing: -0.005em;
+  min-width: 0;
+}
+.s-row.is-named .s-row-title-text {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+/* Subline lives in the title cell. Hidden by default; revealed on hover/focus
+   so the row reads as a calm single line at rest. */
+.s-row-subline {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--muted-foreground);
+  opacity: 0.78;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-height: 0;
+  margin: 0;
+  transition: max-height 0.12s ease, margin-top 0.12s ease;
+}
+.s-row:hover .s-row-subline,
+.s-row.is-focused .s-row-subline {
+  max-height: 18px;
+}
+.s-row-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 4px;
+  background: hsl(var(--tag-hue, var(--accent-main-000)) 55% 55% / 0.18);
+  color: hsl(var(--tag-hue, var(--accent-main-000)) 70% 65%);
+  border: 1px solid hsl(var(--tag-hue, var(--accent-main-000)) 55% 55% / 0.4);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.s-row:hover .s-row-tag {
+  background: hsl(var(--tag-hue, var(--accent-main-000)) 55% 55% / 0.3);
+  border-color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 60% / 0.6);
+}
+.light .s-row .s-row-tag,
+[data-theme="light"] .s-row .s-row-tag {
+  background: hsl(var(--tag-hue, var(--accent-main-000)) 60% 50% / 0.14);
+  color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 32%);
+  border-color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 50% / 0.35);
+}
+.light .s-row:hover .s-row-tag,
+[data-theme="light"] .s-row:hover .s-row-tag {
+  background: hsl(var(--tag-hue, var(--accent-main-000)) 60% 50% / 0.22);
+  border-color: hsl(var(--tag-hue, var(--accent-main-000)) 55% 50% / 0.55);
+}
+.s-row-msgs {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.s-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.s-row:hover .s-row-actions,
+.s-row.is-focused .s-row-actions {
+  opacity: 1;
+}
+.s-row.is-hidden .s-row-actions { opacity: 1; }
+
+.s-row-iconbtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.s-row-iconbtn:hover {
+  background: hsl(var(--muted) / 0.6);
+  color: var(--foreground);
+}
+
+.s-row-resume {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 9px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid hsl(var(--accent-main-000) / 0.32);
+  background: hsl(var(--accent-main-000) / 0.10);
+  color: hsl(var(--accent-main-000));
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.s-row-resume:hover {
+  background: hsl(var(--accent-main-000) / 0.22);
+  border-color: hsl(var(--accent-main-000) / 0.55);
+}
+.s-row-resume .key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.7;
+  border: 1px solid hsl(var(--accent-main-000) / 0.35);
+  border-radius: 3px;
+  padding: 0 4px;
+  letter-spacing: 0.04em;
+}
+
+/* When the s-row sits on a project page (no per-row project tag) we collapse
+   the tag column so the layout still aligns. */
+.s-row.is-project-scoped {
+  grid-template-columns: 22px 78px 1fr auto auto;
+}
+
+/* search highlight inside row titles */
+.s-row mark {
+  background: hsl(var(--accent-main-000) / 0.28);
+  color: var(--foreground);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -1px;
+}
+
+/* ---- Tagged chip strip (Project page) ---- */
+.tagged-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0 2px;
+}
+.tagged-strip-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+}
+.tagged-strip-label svg {
+  color: hsl(var(--accent-main-000));
+  opacity: 0.85;
+}
+
+/* ---- Right rail: Session key/value table ---- */
+.rail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.rail-meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rail-meta-key {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+}
+.rail-meta-val {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.rail-meta-val.is-muted {
+  color: var(--muted-foreground);
+  opacity: 0.85;
+}
+
+/* ---- Tools used pill list ---- */
+.rail-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rail-tool-pill {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: hsl(var(--accent-secondary-000));
+  background: hsl(var(--accent-secondary-000) / 0.10);
+  border: 1px solid hsl(var(--accent-secondary-000) / 0.28);
+  padding: 2px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* ---- Bottom resume bar (Session page) ---- */
+.sv-resume-bar {
+  flex-shrink: 0;
+  border-top: 1px solid hsl(var(--border) / 0.7);
+  background: hsl(var(--bg-100));
+  padding: 16px 24px 18px;
+  position: relative;
+  z-index: 2;
+}
+.sv-resume-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+.sv-resume-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 16px;
+  border: 1px solid hsl(var(--border) / 0.85);
+  border-radius: 999px;
+  background: hsl(var(--bg-000));
+  height: 48px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.sv-resume-input:focus-within {
+  border-color: hsl(var(--accent-main-000) / 0.55);
+  box-shadow: 0 0 0 3px hsl(var(--accent-main-000) / 0.06);
+}
+.sv-resume-glyph {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(var(--accent-main-000));
+  user-select: none;
+  letter-spacing: -0.04em;
+  flex-shrink: 0;
+}
+.sv-resume-input input {
+  flex: 1;
+  height: 36px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0;
+  min-width: 0;
+}
+.sv-resume-input input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.5;
+}
+.sv-resume-key {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  border: 1px solid hsl(var(--border) / 0.7);
+  padding: 2px 7px;
+  border-radius: 5px;
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.sv-resume-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  height: 48px;
+  border: none;
+  border-radius: 8px;
+  background: hsl(var(--accent-main-000));
+  color: hsl(var(--bg-000));
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.sv-resume-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsl(var(--accent-main-000) / 0.3);
+}
+.sv-resume-cta:active {
+  transform: translateY(0);
+}
+.sv-resume-cta-glyph {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.sv-resume-hint {
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+  letter-spacing: -0.005em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sv-resume-hint code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 4px;
+  padding: 1px 6px;
+  background: hsl(var(--bg-200) / 0.5);
+}
+
+/* ---- Dashboard right rail (Activity / Top projects / Keys) ---- */
+.dash-inner.has-rail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 0;
+  align-items: start;
+}
+.dash-inner.has-rail .dash-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding-right: 32px;
+}
+.dash-rail {
+  border-left: 1px solid hsl(var(--border) / 0.5);
+  padding-left: 28px;
+  position: sticky;
+  top: 24px;
+  align-self: start;
+}
+.dash-rail-section + .dash-rail-section {
+  margin-top: 28px;
+}
+.dash-rail-title {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dash-rail-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: hsl(var(--border) / 0.5);
+}
+
+/* Heatmap: 12 columns (weeks) × 7 rows (Mon→Sun). Cells use accent alpha
+   ramps so the brighter the cell, the more sessions that day. */
+.dash-heatmap {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3px;
+}
+.dash-heatcol {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 3px;
+}
+.dash-heatcell {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: hsl(var(--bg-300));
+  transition: transform 0.1s ease;
+}
+.dash-heatcell[data-l="1"] { background: hsl(var(--accent-main-000) / 0.25); }
+.dash-heatcell[data-l="2"] { background: hsl(var(--accent-main-000) / 0.5); }
+.dash-heatcell[data-l="3"] { background: hsl(var(--accent-main-000) / 0.85); }
+.dash-heatcell:hover {
+  transform: scale(1.5);
+  z-index: 1;
+  position: relative;
+}
+.dash-heat-foot {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  opacity: 0.65;
+  display: flex;
+  justify-content: space-between;
+  letter-spacing: 0.04em;
+}
+
+/* Top projects: hued dot + name + count + bar track underneath */
+.dash-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dash-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 10px;
+  row-gap: 6px;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+}
+.dash-bar:hover .dash-bar-name { color: var(--foreground); }
+.dash-bar-name {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--foreground);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  transition: color 0.12s ease;
+}
+.dash-bar-name::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: hsl(var(--tag-hue, 20) 65% 60%);
+  flex-shrink: 0;
+}
+.dash-bar-count {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+.dash-bar-track {
+  grid-column: 1 / -1;
+  height: 3px;
+  border-radius: 2px;
+  background: hsl(var(--bg-300));
+  overflow: hidden;
+}
+.dash-bar-fill {
+  height: 100%;
+  background: hsl(var(--tag-hue, 20) 65% 60%);
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+
+/* Keymap legend */
+.dash-keymap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dash-keymap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--muted-foreground);
+}
+.dash-keymap-row .keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.dash-key {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--foreground);
+  background: hsl(var(--bg-100) / 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1100px) {
+  .dash-inner.has-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dash-rail { display: none; }
+  .dash-inner.has-rail .dash-main { padding-right: 0; }
 }

@@ -4,15 +4,16 @@ import { Message, Tab } from '@/types'
 import { MessageBlock } from './MessageBlock'
 import { Timeline } from './Timeline'
 import { ToolGroup } from './ToolGroup'
-import { Copy, Check, Settings, ChevronRight, Terminal, Tag, PanelRight, PanelRightClose, Trash2 } from 'lucide-react'
+import { Copy, Check, ChevronRight, Tag, PanelRight, PanelRightClose, Trash2 } from 'lucide-react'
 import { launchSessionInTerminal } from '@/utils/launchSession'
+import { formatRelativeTime } from '@/utils/formatters'
 
 interface SessionViewerProps {
   tab: Tab
 }
 
 export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
-  const { messages, setMessages, sessionsByProject, selectProject, setActiveTab, loadSessionsForProject, trashSession } = useAppStore()
+  const { messages, setMessages, sessionsByProject, selectProject, loadSessionsForProject, trashSession } = useAppStore()
   // Auto-scroll is always on; Live/Offline indicator removed as unhelpful chrome.
   const autoScroll = true
   const [currentMessageIndex, setCurrentMessageIndex] = useState<number | undefined>()
@@ -189,10 +190,50 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleLaunchInTerminal = () => {
+  const handleLaunchInTerminal = (query?: string) => {
     if (!tab.sessionId || !tab.projectPath) return
-    launchSessionInTerminal(tab.projectPath, tab.sessionId)
+    launchSessionInTerminal(tab.projectPath, tab.sessionId, query)
   }
+
+  // Bottom resume bar — type a follow-up prompt and either click "Resume in iTerm"
+  // or hit ⌘↵. The query is shell-quoted and appended to the resume command so
+  // the resumed `claude` session opens with the prompt prefilled.
+  const [resumeQuery, setResumeQuery] = useState('')
+  const handleResumeSubmit = () => {
+    handleLaunchInTerminal(resumeQuery.trim() || undefined)
+    setResumeQuery('')
+  }
+
+  // Distinct tool names used in this session — derived from tool_use blocks
+  // on assistant messages. Sorted by first appearance so the rail reads in
+  // the order the user actually saw the tools fire.
+  const toolsUsed = React.useMemo(() => {
+    const seen: string[] = []
+    for (const m of sessionMessages) {
+      const c = m.message?.content
+      if (!Array.isArray(c)) continue
+      for (const item of c) {
+        const name = item?.type === 'tool_use' ? item?.name : undefined
+        if (typeof name === 'string' && !seen.includes(name)) seen.push(name)
+      }
+    }
+    return seen
+  }, [sessionMessages])
+
+  // Duration: span between the first and last message timestamps. Falls back
+  // to null when we don't have at least two parseable timestamps.
+  const durationLabel = React.useMemo(() => {
+    if (sessionMessages.length < 2) return null
+    const first = new Date(sessionMessages[0].timestamp).getTime()
+    const last = new Date(sessionMessages[sessionMessages.length - 1].timestamp).getTime()
+    if (!Number.isFinite(first) || !Number.isFinite(last) || last <= first) return null
+    const min = Math.round((last - first) / 60000)
+    if (min < 1) return '< 1 min'
+    if (min < 60) return `${min} min`
+    const hr = Math.floor(min / 60)
+    const rem = min % 60
+    return rem ? `${hr}h ${rem}m` : `${hr}h`
+  }, [sessionMessages])
 
   const handleDeleteSession = () => {
     if (!tab.sessionId || !session) return
@@ -464,7 +505,7 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
           {groupedMessages.map((group, groupIndex) => {
             if (group.type === 'single') {
               return group.messages.map((message, index) => (
-                <div 
+                <div
                   key={message.uuid || `${groupIndex}-${index}`}
                   ref={el => messageRefs.current[groupIndex] = el}
                 >
@@ -474,7 +515,7 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
             } else {
               // Tool group
               return (
-                <div 
+                <div
                   key={`tool-group-${groupIndex}`}
                   ref={el => messageRefs.current[groupIndex] = el}
                 >
@@ -495,8 +536,9 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
         </div>
         </div>
 
-        {/* Info rail — prompt + recap for the current session */}
-        {infoRailOpen && (session?.firstUserMessage || session?.sessionSummary) && (
+        {/* Info rail — Prompt + Recap + Tools used + Session metadata.
+            Resume CTA has moved to the bottom bar; the rail is now metadata-only. */}
+        {infoRailOpen && (session?.firstUserMessage || session?.sessionSummary || session) && (
           <aside className="rail">
             {session?.firstUserMessage && (
               <section className="rail-section">
@@ -512,36 +554,97 @@ export const SessionViewer: React.FC<SessionViewerProps> = ({ tab }) => {
               </section>
             )}
 
-            <div className="rail-footer">
-              <div className="rail-stats">
-                {session?.mtime && (
-                  <span className="rail-stat" title={new Date(session.mtime).toLocaleString()}>
-                    {new Date(session.mtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                )}
-                {session?.messageCount !== undefined && (
-                  <span className="rail-stat">
-                    {session.messageCount} msgs
-                  </span>
-                )}
-                {tab.sessionId && (
-                  <span className="rail-stat rail-stat-mono" title={tab.sessionId}>
-                    {tab.sessionId.substring(0, 8)}
-                  </span>
-                )}
-              </div>
-              <button
-                className="rail-cta"
-                onClick={handleLaunchInTerminal}
-                title="Resume this session in iTerm"
-              >
-                <Terminal size={14} />
-                <span>Resume in iTerm</span>
-              </button>
-            </div>
+            {toolsUsed.length > 0 && (
+              <section className="rail-section">
+                <div className="rail-label">Tools used</div>
+                <div className="rail-tools">
+                  {toolsUsed.map((name) => (
+                    <span key={name} className="rail-tool-pill">{name}</span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {session && (
+              <section className="rail-section">
+                <div className="rail-label">Session</div>
+                <div className="rail-meta">
+                  {session.mtime && (
+                    <div className="rail-meta-row">
+                      <span className="rail-meta-key">date</span>
+                      <span
+                        className="rail-meta-val"
+                        title={new Date(session.mtime).toLocaleString()}
+                      >
+                        {new Date(session.mtime).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  {session.messageCount !== undefined && (
+                    <div className="rail-meta-row">
+                      <span className="rail-meta-key">messages</span>
+                      <span className="rail-meta-val">{session.messageCount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {durationLabel && (
+                    <div className="rail-meta-row">
+                      <span className="rail-meta-key">duration</span>
+                      <span className="rail-meta-val">{durationLabel}</span>
+                    </div>
+                  )}
+                  {tab.sessionId && (
+                    <div className="rail-meta-row">
+                      <span className="rail-meta-key">id</span>
+                      <span className="rail-meta-val is-muted" title={tab.sessionId}>
+                        {tab.sessionId.substring(0, 8)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
           </aside>
         )}
       </div>
+
+      {/* Bottom resume bar — anchored to the bottom of the main pane. Type a
+          follow-up prompt and Resume launches `claude --resume {id}` with the
+          prompt shell-quoted onto the end. ⌘↵ submits without leaving the input. */}
+      {session && (
+        <form
+          className="sv-resume-bar"
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleResumeSubmit()
+          }}
+        >
+          <div className="sv-resume-row">
+            <div className="sv-resume-input">
+              <span className="sv-resume-glyph" aria-hidden="true">›_</span>
+              <input
+                type="text"
+                value={resumeQuery}
+                onChange={(e) => setResumeQuery(e.target.value)}
+                placeholder="continue this session — type your next prompt"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault()
+                    handleResumeSubmit()
+                  }
+                }}
+              />
+              <span className="sv-resume-key" aria-hidden="true">⌘↵</span>
+            </div>
+            <button type="submit" className="sv-resume-cta" title="Resume in iTerm">
+              <span className="sv-resume-cta-glyph" aria-hidden="true">›_</span>
+              <span>Resume in iTerm</span>
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Timeline minimap */}
       <div 

@@ -1,5 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Folder, MessageSquare, Tag, Search, Terminal, EyeOff, Eye } from 'lucide-react'
+import {
+  Folder,
+  MessageSquareDashed,
+  Tag,
+  Search,
+  EyeOff,
+  Eye,
+  ArrowDownUp,
+  ArrowUp,
+  X,
+} from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { formatRelativeTime, formatClockTime, cleanTitle } from '@/utils/formatters'
 import { launchSessionInTerminal, isTerminalModifier } from '@/utils/launchSession'
@@ -13,6 +23,9 @@ interface SessionListViewProps {
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+const LONG_THRESHOLD = 50
+
+type FilterMode = 'all' | 'named' | 'long'
 
 export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath }) => {
   const {
@@ -29,32 +42,32 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
     toggleShowHidden,
   } = useAppStore()
 
-  // In-project filter input — press "/" anywhere (except while typing) to open
   const [filter, setFilter] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
+  const [filterMode, setFilterMode] = useState<FilterMode>('all')
+  const [sortMode, setSortMode] = useState<'recent' | 'oldest'>('recent')
+  const [focusedRow, setFocusedRow] = useState<number>(-1)
+  const filterInputRef = useRef<HTMLInputElement | null>(null)
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== '/') return
-      const t = e.target as HTMLElement | null
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t as any).isContentEditable)) return
-      e.preventDefault()
-      setFilterOpen(true)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  const openFilter = () => {
+    setFilterOpen(true)
+    requestAnimationFrame(() => filterInputRef.current?.focus())
+  }
+  const closeFilter = () => {
+    setFilter('')
+    setFilterOpen(false)
+  }
 
   // Hover preview popup
   const [hoveredSession, setHoveredSession] = useState<string | null>(null)
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0, width: 0, height: 0 })
-  const [showPreview, setShowPreview] = useState(true)
+  const [showPreview, setShowPreview] = useState(false)
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>()
 
   useEffect(() => {
     const load = () => {
       const v = localStorage.getItem('claude-viewer-show-session-preview')
-      setShowPreview(v !== 'false')
+      setShowPreview(v === 'true')
     }
     load()
     window.addEventListener('storage', load)
@@ -108,32 +121,20 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
       sessionsThisWeek: thisWeek.length,
       sessionsLastWeek: lastWeek.length,
       messagesTotal: projectSessions.reduce((a, s) => a + (s.messageCount || 0), 0),
-      messagesThisWeek: thisWeek.reduce((a, s) => a + (s.messageCount || 0), 0),
-      messagesLastWeek: lastWeek.reduce((a, s) => a + (s.messageCount || 0), 0),
       namedCount: projectSessions.filter((s) => s.customTitle).length,
+      longCount: projectSessions.filter((s) => (s.messageCount || 0) > LONG_THRESHOLD).length,
       latestMtime,
     }
   }, [projectSessions])
 
-  const labeled = useMemo(() => {
-    return projectSessions
-      .filter((s) => s.customTitle)
-      .sort((a, b) => {
-        const ta = a.mtime ? new Date(a.mtime).getTime() : 0
-        const tb = b.mtime ? new Date(b.mtime).getTime() : 0
-        return tb - ta
-      })
-  }, [projectSessions])
-
-  // Deduped labeled chips — one chip per unique customTitle, most-recent session
-  // surfaced on click, count badge when the label occurs >1×.
+  // Tagged chips — one per unique customTitle within this project.
   const labeledChips = useMemo(() => {
     const byTitle = new Map<string, { title: string; count: number; latest: Session }>()
-    for (const s of labeled) {
-      const key = s.customTitle!
-      const prev = byTitle.get(key)
+    for (const s of projectSessions) {
+      if (!s.customTitle) continue
+      const prev = byTitle.get(s.customTitle)
       if (!prev) {
-        byTitle.set(key, { title: key, count: 1, latest: s })
+        byTitle.set(s.customTitle, { title: s.customTitle, count: 1, latest: s })
       } else {
         prev.count++
         const ts = s.mtime ? new Date(s.mtime).getTime() : 0
@@ -146,25 +147,30 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
       const tb = b.latest.mtime ? new Date(b.latest.mtime).getTime() : 0
       return tb - ta
     })
-  }, [labeled])
+  }, [projectSessions])
 
-  // Filter applied over title, firstUserMessage, preview
   const filteredSessions = useMemo(() => {
     const q = filter.trim().toLowerCase()
-    if (!q) return projectSessions
     return projectSessions.filter((s) => {
+      if (filterMode === 'named' && !s.customTitle) return false
+      if (filterMode === 'long' && (s.messageCount || 0) <= LONG_THRESHOLD) return false
+      if (!q) return true
       return (
         (s.customTitle || '').toLowerCase().includes(q) ||
         (s.firstUserMessage || '').toLowerCase().includes(q) ||
         (s.preview || '').toLowerCase().includes(q)
       )
     })
-  }, [projectSessions, filter])
+  }, [projectSessions, filter, filterMode])
 
   const recentByDay = useMemo(() => {
     const sorted = [...filteredSessions]
       .filter((s) => s.mtime)
-      .sort((a, b) => new Date(b.mtime!).getTime() - new Date(a.mtime!).getTime())
+      .sort((a, b) => {
+        const at = new Date(a.mtime!).getTime()
+        const bt = new Date(b.mtime!).getTime()
+        return sortMode === 'oldest' ? at - bt : bt - at
+      })
     const groups = new Map<string, { label: string; items: Session[] }>()
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -183,8 +189,48 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
       g.items.push(s)
       groups.set(k, g)
     }
+    // Map preserves insertion order, which equals the row sort order, so the
+    // day groups already come out newest-first in `recent` mode and
+    // oldest-first in `oldest` mode — no extra reverse needed.
     return [...groups.entries()].map(([, v]) => v)
-  }, [filteredSessions])
+  }, [filteredSessions, sortMode])
+
+  const flatRows = useMemo(
+    () => recentByDay.flatMap((g) => g.items),
+    [recentByDay],
+  )
+  const totalMatches = flatRows.length
+
+  useEffect(() => {
+    setFocusedRow(-1)
+  }, [filter, filterMode, currentProjectPath])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      const inField = !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t as any).isContentEditable)
+      if (e.key === '/' && !inField) {
+        e.preventDefault()
+        openFilter()
+        return
+      }
+      if (inField) return
+      if (e.key === 'j') {
+        e.preventDefault()
+        setFocusedRow((i) => Math.min(flatRows.length - 1, (i < 0 ? -1 : i) + 1))
+      } else if (e.key === 'k') {
+        e.preventDefault()
+        setFocusedRow((i) => Math.max(0, i - 1))
+      } else if (e.key === 'Enter' && focusedRow >= 0 && focusedRow < flatRows.length) {
+        e.preventDefault()
+        const s = flatRows[focusedRow]
+        if (e.metaKey || e.ctrlKey) launchSessionInTerminal(currentProjectPath || '', s.id)
+        else handleSessionClick(s)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [flatRows, focusedRow, currentProjectPath])
 
   const handleSessionClick = (s: Session, e?: React.MouseEvent) => {
     if (e && isTerminalModifier(e)) {
@@ -203,7 +249,7 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
     hoverTimeoutRef.current = setTimeout(() => {
       setPreviewPosition(pos)
       setHoveredSession(s.id)
-    }, 900)
+    }, 500)
   }
   const handlePreviewLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
@@ -215,6 +261,21 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
   const handlePreviewPopupClose = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
     hoverTimeoutRef.current = setTimeout(() => setHoveredSession(null), 100)
+  }
+
+  // Highlight occurrences of the filter query in a row title
+  const renderTitle = (title: string) => {
+    const q = filter.trim()
+    if (!q) return title
+    const idx = title.toLowerCase().indexOf(q.toLowerCase())
+    if (idx < 0) return title
+    return (
+      <>
+        {title.slice(0, idx)}
+        <mark>{title.slice(idx, idx + q.length)}</mark>
+        {title.slice(idx + q.length)}
+      </>
+    )
   }
 
   if (!selectedProject || !currentProjectPath) {
@@ -230,15 +291,17 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
   }
 
   const displayName = selectedProject.name.split('/').pop() || selectedProject.name
-
   const weekDelta = stats.sessionsThisWeek - stats.sessionsLastWeek
+  const projectHue = hueForProject(displayName)
+
+  let rowIdx = -1
 
   return (
     <div className="dash-root">
-      <div className="dash-inner proj-compact" style={{ ['--tag-hue' as any]: hueForProject(displayName) }}>
+      <div className="dash-inner proj-compact" style={{ ['--tag-hue' as any]: projectHue }}>
         <header className="proj-hero">
           <div className="proj-hero-title-row">
-            <Folder size={18} className="proj-hero-icon" />
+            <Folder size={22} className="proj-hero-icon" />
             <h1 className="proj-hero-name">{displayName}</h1>
           </div>
           <div className="proj-hero-path">{selectedProject.name}</div>
@@ -261,8 +324,10 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
               <strong>{stats.sessionsThisWeek}</strong>
               <span className="proj-stat-label">this week</span>
               {stats.sessionsLastWeek > 0 && weekDelta !== 0 && (
-                <span className="proj-stat-hint">
-                  {weekDelta > 0 ? '↑' : '↓'} {Math.abs(weekDelta)} vs last
+                <span className="proj-stat-hint" style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                  {weekDelta > 0 ? <ArrowUp size={9} strokeWidth={2.6} /> : '↓'}
+                  {Math.abs(weekDelta)}
+                  <span style={{ opacity: 0.65, fontSize: 10.5, marginLeft: 4 }}>vs last</span>
                 </span>
               )}
             </span>
@@ -284,75 +349,124 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
           projects={projects}
         />
 
-        <div className="proj-labeled-row">
-          <button
-            className={`proj-labeled-icon-btn${filterOpen || filter ? ' is-active' : ''}`}
-            onClick={() => setFilterOpen((v) => !v)}
-            title="Filter (/)"
-            aria-label="Filter sessions"
-          >
-            <Search size={12} />
-          </button>
-          {labeledChips.length > 0 && (
-            <Tag size={12} className="proj-labeled-icon" />
-          )}
-          {labeledChips.length > 0 && labeledChips.map((c) => (
-            <button
-              key={c.title}
-              className="proj-chip"
-              onClick={(e) => handleSessionClick(c.latest, e)}
-              onMouseEnter={(e) => handlePreviewEnter(c.latest, e)}
-              onMouseLeave={handlePreviewLeave}
-              title={`${c.title}${c.count > 1 ? ` — ${c.count} sessions` : ''}${c.latest.mtime ? ` · most recent ${formatRelativeTime(new Date(c.latest.mtime))}` : ''}`}
-            >
-              <span className="proj-chip-title">{c.title}</span>
-              {c.count > 1 ? (
-                <span className="proj-chip-count">×{c.count}</span>
-              ) : (
-                <span className="proj-chip-sub">
-                  {c.latest.mtime ? formatRelativeTime(new Date(c.latest.mtime)) : ''}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {(filterOpen || filter) && (
-          <div className="proj-filter">
-            <Search size={12} className="proj-filter-icon" />
-            <input
-              type="text"
-              className="proj-filter-input"
-              placeholder="Filter sessions in this project…"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              onBlur={() => { if (!filter) setFilterOpen(false) }}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') { setFilter(''); setFilterOpen(false) }
-              }}
-              autoFocus
-            />
-            <button
-              className="proj-filter-clear"
-              onClick={() => { setFilter(''); setFilterOpen(false) }}
-              title="Close filter (Esc)"
-            >
-              ×
-            </button>
+        {labeledChips.length > 0 && (
+          <div className="tagged-strip">
+            <span className="tagged-strip-label">
+              <Tag size={11} /> tagged
+            </span>
+            {labeledChips.map((c) => (
+              <button
+                key={c.title}
+                className="proj-chip"
+                onClick={(e) => handleSessionClick(c.latest, e)}
+                onMouseEnter={(e) => handlePreviewEnter(c.latest, e)}
+                onMouseLeave={handlePreviewLeave}
+                title={`${c.title}${c.count > 1 ? ` — ${c.count} sessions` : ''}${c.latest.mtime ? ` · most recent ${formatRelativeTime(new Date(c.latest.mtime))}` : ''}`}
+              >
+                <span className="proj-chip-title">{c.title}</span>
+                {c.count > 1 ? (
+                  <span className="proj-chip-count">×{c.count}</span>
+                ) : (
+                  <span className="proj-chip-sub">
+                    {c.latest.mtime ? formatRelativeTime(new Date(c.latest.mtime)) : ''}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
         )}
+
+        <div className="fs-strip" role="toolbar" aria-label="Session filters">
+          <button
+            type="button"
+            className={`fs-chip${filterMode === 'all' ? ' is-active' : ''}`}
+            onClick={() => setFilterMode('all')}
+          >
+            all
+            <span className="fs-chip-count">{stats.sessionsTotal}</span>
+          </button>
+          <button
+            type="button"
+            className={`fs-chip${filterMode === 'named' ? ' is-active' : ''}`}
+            onClick={() => setFilterMode(filterMode === 'named' ? 'all' : 'named')}
+          >
+            named
+            <span className="fs-chip-count">{stats.namedCount}</span>
+          </button>
+          <button
+            type="button"
+            className={`fs-chip${filterMode === 'long' ? ' is-active' : ''}`}
+            onClick={() => setFilterMode(filterMode === 'long' ? 'all' : 'long')}
+          >
+            &gt; {LONG_THRESHOLD}
+            <span className="fs-chip-count">{stats.longCount}</span>
+          </button>
+          <button
+            type="button"
+            className="fs-chip is-active"
+            onClick={() => setSortMode((m) => (m === 'recent' ? 'oldest' : 'recent'))}
+            title={`Sort: ${sortMode}. Click to switch to ${sortMode === 'recent' ? 'oldest' : 'recent'}.`}
+          >
+            <ArrowDownUp size={11} /> {sortMode}
+          </button>
+          {filterOpen ? (
+            <label className="fs-search">
+              <span className="fs-search-icon">
+                <Search size={13} />
+              </span>
+              <input
+                ref={filterInputRef}
+                type="text"
+                className="fs-search-input"
+                placeholder={`filter sessions in ${displayName}…`}
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') closeFilter()
+                }}
+              />
+              {filter && <span className="fs-search-result">{totalMatches}</span>}
+              <button
+                type="button"
+                className="fs-search-clear"
+                onClick={closeFilter}
+                title="Close filter (Esc)"
+                aria-label="Close filter"
+              >
+                <X size={12} />
+              </button>
+            </label>
+          ) : (
+            <button
+              type="button"
+              className="fs-chip fs-trigger"
+              onClick={openFilter}
+              title="Filter (/)"
+            >
+              <Search size={11} /> filter
+              <span className="fs-key">/</span>
+            </button>
+          )}
+        </div>
 
         <section className="dash-recent">
           {projectSessions.length === 0 ? (
             <div className="dash-loading">No sessions in this project yet</div>
-          ) : filteredSessions.length === 0 ? (
+          ) : flatRows.length === 0 ? (
             <div className="dash-loading">No sessions match “{filter}”</div>
           ) : (
             recentByDay.map((group, gi) => (
               <div key={gi} className="dash-day-group">
-                <div className="dash-day-label">{group.label}</div>
+                <div className="day-header">
+                  <span className="day-header-label">{group.label}</span>
+                  <span className="day-header-meta">
+                    {group.items.length} {group.items.length === 1 ? 'session' : 'sessions'}
+                  </span>
+                </div>
                 <div>
                   {group.items.map((s) => {
+                    rowIdx += 1
+                    const idx = rowIdx
                     const named = !!s.customTitle
                     const cleanedFirst = cleanTitle(s.firstUserMessage)
                     const cleanedPreview = cleanTitle(s.preview)
@@ -361,33 +475,40 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
                       s.customTitle ||
                       cleanedFirst ||
                       cleanedPreview ||
+                      cleanedSummary ||
                       'Untitled session'
                     const subline = named
                       ? (cleanedFirst || cleanedSummary)
-                      : cleanedSummary
+                      : (cleanedSummary && cleanedSummary !== title ? cleanedSummary : undefined)
                     const timeLabel = s.mtime ? formatClockTime(new Date(s.mtime)) : ''
                     const isHidden = !!hiddenSessions[s.id]
+                    const isFocused = idx === focusedRow
                     return (
                       <div
                         key={s.id}
-                        className={`proj-row${named ? ' is-named' : ''}${isHidden ? ' is-hidden' : ''}`}
+                        className={`s-row is-project-scoped${named ? ' is-named' : ''}${isHidden ? ' is-hidden' : ''}${isFocused ? ' is-focused' : ''}`}
                         onClick={(e) => handleSessionClick(s, e)}
-                        onMouseEnter={(e) => handlePreviewEnter(s, e)}
+                        onMouseEnter={(e) => {
+                          setFocusedRow(idx)
+                          handlePreviewEnter(s, e)
+                        }}
                         onMouseLeave={handlePreviewLeave}
                       >
-                        <div className="proj-row-head">
-                          {named && <Tag size={12} className="proj-row-tag" />}
-                          <span className="proj-row-title">{title}</span>
-                          <span className="proj-row-meta">
-                            {timeLabel && <span>{timeLabel}</span>}
-                            {timeLabel && <span className="proj-row-meta-sep">·</span>}
-                            <span className="proj-row-msgs">
-                              <MessageSquare size={11} />
-                              {s.messageCount}
-                            </span>
-                          </span>
+                        <div className="s-row-tagcell">
+                          {named ? <Tag size={12} aria-label="Named session" /> : null}
+                        </div>
+                        <span className="s-row-time">{timeLabel}</span>
+                        <div className="s-row-title-cell">
+                          <span className="s-row-title-text">{renderTitle(title)}</span>
+                          {subline && <span className="s-row-subline">{subline}</span>}
+                        </div>
+                        <span className="s-row-msgs" title={`${s.messageCount} messages`}>
+                          <MessageSquareDashed size={11} />
+                          {s.messageCount}
+                        </span>
+                        <span className="s-row-actions">
                           <button
-                            className="proj-row-hide"
+                            className="s-row-iconbtn"
                             onClick={(e) => {
                               e.stopPropagation()
                               toggleHiddenSession(s.id)
@@ -398,18 +519,16 @@ export const SessionListView: React.FC<SessionListViewProps> = ({ projectPath })
                             {isHidden ? <Eye size={12} /> : <EyeOff size={12} />}
                           </button>
                           <button
-                            className="proj-row-term"
+                            className="s-row-resume"
                             onClick={(e) => {
                               e.stopPropagation()
                               launchSessionInTerminal(currentProjectPath || '', s.id)
                             }}
-                            title="Resume this session in iTerm"
-                            aria-label="Resume in iTerm"
+                            title="Resume in iTerm"
                           >
-                            <Terminal size={12} />
+                            Resume <span className="key">⌥↵</span>
                           </button>
-                        </div>
-                        {subline && <div className="proj-row-subline">{subline}</div>}
+                        </span>
                       </div>
                     )
                   })}

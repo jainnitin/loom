@@ -137,7 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenPalette, onOpenSettings 
           <button
             className="sidebar-new-chat"
             onClick={() => startNewChatInTerminal()}
-            title="Launch a new Claude chat in iTerm (configurable in Settings)"
+            title="Launch a new chat in iTerm (configurable in Settings)"
           >
             <Plus size={14} strokeWidth={2.2} />
             <span>Launch new chat</span>

@@ -89,7 +89,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const [newChatCommand, setNewChatCommand] = useState('')
   const [newChatPath, setNewChatPath] = useState('')
   const [isNewChatDefault, setIsNewChatDefault] = useState(true)
-  const [showSessionPreview, setShowSessionPreview] = useState(true)
+  const [showSessionPreview, setShowSessionPreview] = useState(false)
   const [toolPreviewCount, setToolPreviewCount] = useState(1)
 
   useEffect(() => {
@@ -103,9 +103,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         setIsDefault(true)
       }
       
-      // Load session preview setting
+      // Load session preview setting — disabled by default; users can opt in.
       const savedPreviewSetting = localStorage.getItem('claude-viewer-show-session-preview')
-      setShowSessionPreview(savedPreviewSetting !== 'false') // Default to true
+      setShowSessionPreview(savedPreviewSetting === 'true')
       
       // Load tool preview count setting
       const savedToolPreviewCount = localStorage.getItem('claude-viewer-tool-preview-count')

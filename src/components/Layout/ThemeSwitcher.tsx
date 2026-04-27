@@ -3,9 +3,9 @@ import { Palette, Check } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 const THEMES: { id: string; label: string; swatches: [string, string, string] }[] = [
-  { id: 'light',     label: 'Claude Light', swatches: ['#ffffff', '#f4f1e8', '#c96442'] },
-  { id: 'dark',      label: 'Claude Dark',  swatches: ['#262624', '#1f1e1d', '#c96442'] },
-  { id: 'honeycomb', label: 'Honeycomb',    swatches: ['#1a1714', '#332e28', '#f5a97f'] },
+  { id: 'light',     label: 'Light',     swatches: ['#ffffff', '#f4f1e8', '#c96442'] },
+  { id: 'dark',      label: 'Dark',      swatches: ['#262624', '#1f1e1d', '#c96442'] },
+  { id: 'honeycomb', label: 'Honeycomb', swatches: ['#1a1714', '#332e28', '#f5a97f'] },
 ]
 
 export const ThemeSwitcher: React.FC = () => {

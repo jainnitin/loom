@@ -8,12 +8,23 @@ export const DEFAULT_NEW_CHAT_TEMPLATE = 'cd {projectPath}; claude'
  * Build the resume command from the user's template (Settings modal) and
  * launch it in iTerm2 (falling back to Terminal.app). Used by Cmd+click
  * on any session row / card, and the "Open in iTerm" button in SessionViewer.
+ *
+ * An optional `query` is appended as a single shell-quoted argument so the
+ * resumed `claude` session opens with the prompt prefilled. The default
+ * resume template doesn't include {query}, so we just append; if a custom
+ * template uses {query} explicitly we honor that placement instead.
  */
-export async function launchSessionInTerminal(projectPath: string, sessionId: string) {
+export async function launchSessionInTerminal(projectPath: string, sessionId: string, query?: string) {
   const template = localStorage.getItem('claude-viewer-custom-command') || DEFAULT_TEMPLATE
-  const command = template
+  const trimmedQuery = query?.trim() || ''
+  let command = template
     .replaceAll('{projectPath}', projectPath)
     .replaceAll('{sessionId}', sessionId)
+  if (template.includes('{query}')) {
+    command = command.replaceAll('{query}', trimmedQuery ? shellQuote(trimmedQuery) : '')
+  } else if (trimmedQuery) {
+    command = `${command} ${shellQuote(trimmedQuery)}`
+  }
 
   if (!window.api || !window.api.launchInTerminal) {
     console.warn('[launchSessionInTerminal] window.api.launchInTerminal not available')
