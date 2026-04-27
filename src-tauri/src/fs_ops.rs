@@ -86,6 +86,15 @@ pub fn get_projects() -> Vec<Project> {
         }
 
         let resolved_name = resolve_project_path(&dir_name);
+        // Hide stale projects: the Claude folder still exists but the project
+        // is no longer usable from Loom. Two cases:
+        //   - session_count == 0 (no JSONL files left to show)
+        //   - the resolved working directory is gone (e.g. the user renamed
+        //     or deleted /Users/me/code/foo). Without it, every action that
+        //     `cd`s into the path — resume, new chat — would fail anyway.
+        if session_count == 0 || !Path::new(&resolved_name).exists() {
+            continue;
+        }
         projects.push(Project {
             name: resolved_name,
             path: project_path.to_string_lossy().to_string(),
