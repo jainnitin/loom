@@ -12,7 +12,6 @@
   "ignore": [
     "dist/**",
     "release/**",
-    "build/**",
     "src-tauri/**",
     ".claude/**"
   ],
