@@ -14,7 +14,7 @@ Claude Code is great for doing the work, but finding what you did two weeks ago 
 **Browse**
 - **Dashboard** — recent activity across every project, with week-over-week deltas and a compose box for starting a new chat anywhere.
 - **Project view** — sessions grouped by day, filterable (`all` / `named` / `>50 messages` / `recent`), with hover recap cards distilled from the last assistant turn.
-- **Session view** — full transcript with rich rendering for Bash, file edit, Todo, and Web tool calls. Live-updates while Claude is writing.
+- **Session view** — full transcript with rich rendering for Bash, file edit, Todo, and Web tool calls. Auto-refreshes as Claude appends new turns to the JSONL.
 - **⌘K palette** — fuzzy-search across projects, first-prompts, and `/title`-labeled sessions.
 
 **Organize**
