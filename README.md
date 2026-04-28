@@ -64,11 +64,6 @@ npm install && npm start    # builds Loom.app and opens it
 
 The build is ad-hoc signed locally — on first launch macOS will block it; right-click the app → **Open** → **Open**. Drag `Loom.app` into `/Applications` if you want it in Spotlight.
 
-Other scripts:
-
-- `npm run build` — same build as `npm start` but doesn't auto-open. Use this when distributing the DMG.
-- `npm run dev` — runs the desktop app against Vite's dev server with HMR. Use this for frontend work.
-
 ## Stack
 
 Tauri 2 · React 19 · Vite · TypeScript · Zustand · Tailwind v4.
