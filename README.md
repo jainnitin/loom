@@ -60,8 +60,7 @@ Then build and launch the Mac app:
 ```bash
 git clone https://github.com/jainnitin/loom.git
 cd loom
-npm install
-npm start          # builds Loom.app and opens it
+npm install && npm start    # builds Loom.app and opens it
 ```
 
 The build is ad-hoc signed locally — on first launch macOS will block it; right-click the app → **Open** → **Open**. Drag `Loom.app` into `/Applications` if you want it in Spotlight.
