@@ -15,9 +15,11 @@ declare global {
       onFileChange: (callback: (path: string) => void) => () => void
       onDeepLinkOpen: (callback: (params: DeepLinkParams) => void) => () => void
       onMenuAction: (callback: (action: string) => void) => () => void
+      onSuggestMoveToApplications: (callback: () => void) => () => void
       getHomePath: () => Promise<string>
       launchInTerminal: (command: string) => Promise<{ ok: boolean; error?: string }>
       trashSession: (filePath: string) => Promise<{ ok: boolean; error?: string }>
+      moveToApplications: () => Promise<{ ok: boolean; error?: string }>
     }
   }
 }

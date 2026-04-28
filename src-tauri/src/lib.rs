@@ -17,6 +17,7 @@ use fs_ops::{claude_projects_path, get_projects, get_sessions, read_session_file
 const SCHEME: &str = "claude-viewer";
 const EVENT_DEEP_LINK_OPEN: &str = "deep-link-open";
 const EVENT_MENU_ACTION: &str = "menu-action";
+const EVENT_SUGGEST_MOVE: &str = "suggest-move-to-applications";
 
 #[derive(Serialize)]
 pub struct OpResult {
@@ -86,6 +87,62 @@ fn fs_trash_session(file_path: String) -> OpResult {
     match trash::delete(&file_path) {
         Ok(_) => OpResult::success(),
         Err(e) => OpResult::err(e.to_string()),
+    }
+}
+
+/// Returns true when we're running from an actual .app bundle that lives
+/// outside /Applications — i.e. the user launched us from a DMG, Downloads,
+/// Desktop, etc. Returns false in dev mode (no .app in the path).
+#[cfg(target_os = "macos")]
+fn should_suggest_move_to_applications() -> bool {
+    let Ok(exe) = std::env::current_exe() else { return false };
+    let path = exe.to_string_lossy();
+    path.contains(".app/Contents/") && !path.starts_with("/Applications/")
+}
+
+#[tauri::command]
+fn system_move_to_applications() -> OpResult {
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+
+        let Ok(exe) = std::env::current_exe() else {
+            return OpResult::err("Could not resolve executable path");
+        };
+
+        // Walk up from …/Loom.app/Contents/MacOS/loom to find the .app root.
+        let bundle = exe
+            .ancestors()
+            .find(|p| p.extension().and_then(|e| e.to_str()) == Some("app"))
+            .map(|p| p.to_path_buf());
+
+        let bundle = match bundle {
+            Some(b) => b,
+            None => return OpResult::err("Could not locate .app bundle"),
+        };
+
+        let name = match bundle.file_name() {
+            Some(n) => n.to_string_lossy().to_string(),
+            None => return OpResult::err("Could not determine bundle name"),
+        };
+
+        let dest = format!("/Applications/{name}");
+
+        // ditto preserves code signatures, extended attributes, and resource forks.
+        let status = Command::new("ditto").arg(&bundle).arg(&dest).status();
+
+        match status {
+            Ok(s) if s.success() => {
+                let _ = Command::new("open").arg(&dest).spawn();
+                std::process::exit(0);
+            }
+            Ok(s) => OpResult::err(format!("ditto failed (exit {})", s.code().unwrap_or(-1))),
+            Err(e) => OpResult::err(e.to_string()),
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        OpResult::err("Only supported on macOS")
     }
 }
 
@@ -285,6 +342,20 @@ pub fn run() {
                 main.open_devtools();
             }
 
+            // Suggest moving to /Applications if launched from elsewhere (DMG,
+            // Downloads, Desktop…). Delay so the UI is ready when the banner
+            // appears.
+            #[cfg(target_os = "macos")]
+            if should_suggest_move_to_applications() {
+                let h = handle.clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_millis(1200));
+                    if let Some(win) = h.get_webview_window("main") {
+                        let _ = win.emit(EVENT_SUGGEST_MOVE, ());
+                    }
+                });
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -295,6 +366,7 @@ pub fn run() {
             fs_unwatch_file,
             fs_trash_session,
             system_launch_in_terminal,
+            system_move_to_applications,
             path_get_home,
         ])
         .run(tauri::generate_context!())

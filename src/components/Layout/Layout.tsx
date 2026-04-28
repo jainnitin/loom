@@ -6,6 +6,7 @@ import { SessionListView } from '../SessionViewer/SessionListView'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
 import { SettingsModal } from '../Settings/SettingsModal'
+import { MoveToApplicationsBanner } from './MoveToApplicationsBanner'
 import { useAppStore } from '@/store/appStore'
 
 export const Layout: React.FC = () => {
@@ -146,6 +147,7 @@ export const Layout: React.FC = () => {
           {view}
         </main>
       </div>
+      <MoveToApplicationsBanner />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>

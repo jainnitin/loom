@@ -14,7 +14,7 @@
     "dev:vite": "vite",
     "build": "tauri build",
     "build:vite": "vite build",
-    "start": "command -v cargo > /dev/null || (echo 'Loom needs Rust: brew install rust' && exit 1) && CARGO_TERM_QUIET=true tauri build --bundles app && open src-tauri/target/release/bundle/macos/Loom.app",
+    "start": "command -v cargo > /dev/null || (echo 'Loom needs Rust: brew install rust' && exit 1) && tauri build --bundles app && open src-tauri/target/release/bundle/macos/Loom.app",
     "preview": "vite preview",
     "tauri": "tauri"
   },

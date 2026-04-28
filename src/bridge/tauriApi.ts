@@ -19,9 +19,11 @@ type LoomApi = {
   onFileChange: (callback: (path: string) => void) => () => void
   onDeepLinkOpen: (callback: (params: DeepLinkParams) => void) => () => void
   onMenuAction: (callback: (action: string) => void) => () => void
+  onSuggestMoveToApplications: (callback: () => void) => () => void
   getHomePath: () => Promise<string>
   launchInTerminal: (command: string) => Promise<OpResult>
   trashSession: (filePath: string) => Promise<OpResult>
+  moveToApplications: () => Promise<OpResult>
 }
 
 const fileChangeListeners = new Set<(path: string) => void>()
@@ -87,6 +89,9 @@ const api: LoomApi = {
 
   onMenuAction: (callback) => subscribe<string>('menu-action', callback),
 
+  onSuggestMoveToApplications: (callback) =>
+    subscribe<null>('suggest-move-to-applications', () => callback()),
+
   getHomePath: () => invoke<string>('path_get_home'),
 
   launchInTerminal: (command) =>
@@ -94,6 +99,8 @@ const api: LoomApi = {
 
   trashSession: (filePath) =>
     invoke<OpResult>('fs_trash_session', { filePath }),
+
+  moveToApplications: () => invoke<OpResult>('system_move_to_applications'),
 }
 
 // Walk up from the click target. Honor `data-tauri-drag-region` on any
