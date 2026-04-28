@@ -51,11 +51,8 @@ Claude Code is great for doing the work, but finding what you did two weeks ago 
 
 Loom is a Tauri app — Node builds the React/Vite frontend, Rust compiles the native macOS shell.
 
-Each line below installs only if the tool is missing (`||` short-circuits when the version check succeeds):
-
 ```bash
-node --version  || brew install node
-cargo --version || brew install rust
+brew install node rust
 ```
 
 Then build and launch the Mac app:
