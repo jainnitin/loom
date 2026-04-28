@@ -8,14 +8,13 @@
   },
   "type": "module",
   "scripts": {
-    "predev": "node scripts/preflight.cjs",
-    "prebuild": "node scripts/preflight.cjs",
-    "prestart": "node scripts/preflight.cjs",
+    "predev": "command -v cargo > /dev/null || (echo 'Loom needs Rust: brew install rust' && exit 1)",
+    "prebuild": "command -v cargo > /dev/null || (echo 'Loom needs Rust: brew install rust' && exit 1)",
     "dev": "tauri dev",
     "dev:vite": "vite",
     "build": "tauri build",
     "build:vite": "vite build",
-    "start": "tauri build && open src-tauri/target/release/bundle/macos/Loom.app",
+    "start": "command -v cargo > /dev/null || (echo 'Loom needs Rust: brew install rust' && exit 1) && CARGO_TERM_QUIET=true tauri build --bundles app && open src-tauri/target/release/bundle/macos/Loom.app",
     "preview": "vite preview",
     "tauri": "tauri"
   },

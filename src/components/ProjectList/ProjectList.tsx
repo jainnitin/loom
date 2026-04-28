@@ -251,7 +251,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ searchQuery = '' }) =>
   }
 
   const renderBucketHeader = (key: BucketKey, label: string, count: number) => {
-    if (count === 0 && key !== 'pinned') {
+    if (count === 0 && key !== 'pinned' && key !== 'active') {
       return null
     }
     const isExpanded = expandedBuckets[key]
