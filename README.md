@@ -74,8 +74,6 @@ Other scripts:
 - `npm run build` — same build as `npm start` but doesn't auto-open. Use this when distributing the DMG.
 - `npm run dev` — runs the desktop app against Vite's dev server with HMR. Use this for frontend work.
 
-All three preflight-check for `cargo` and bail with the rustup line if it's missing.
-
 ## Stack
 
 Tauri 2 · React 19 · Vite · TypeScript · Zustand · Tailwind v4.
