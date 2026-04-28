@@ -55,10 +55,10 @@ Each line below installs only if the tool is missing (`||` short-circuits when t
 
 ```bash
 node --version  || brew install node
-cargo --version || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo --version || brew install rust
 ```
 
-If rustup ran, restart your shell so `cargo` lands on `$PATH`. Then build and launch the Mac app:
+Then build and launch the Mac app:
 
 ```bash
 git clone https://github.com/jainnitin/loom.git
