@@ -58,8 +58,7 @@ brew install node rust
 Then build and launch the Mac app:
 
 ```bash
-git clone https://github.com/jainnitin/loom.git
-cd loom
+git clone https://github.com/jainnitin/loom.git && cd loom
 npm install && npm start    # builds Loom.app and opens it
 ```
 
